@@ -13,39 +13,27 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#15181f;
-    --ink-soft:#232838;
-    --paper:#f4f2ec;
-    --paper-dim:#e8e5db;
-    --signal:#ff5e2c;
-    --signal-dim:#ffb199;
-    --blue:#2f7dfb;
-    --yellow:#f2a70b;
-    --green:#1bad6b;
-    --red:#e3403a;
-    --line:#d8d4c6;
-    --text-dim:#6b7280;
+    --ink:#15181f; --ink-soft:#232838; --paper:#f4f2ec; --paper-dim:#e8e5db;
+    --signal:#ff5e2c; --signal-dim:#ffb199; --blue:#2f7dfb; --yellow:#f2a70b;
+    --green:#1bad6b; --red:#e3403a; --line:#d8d4c6; --text-dim:#6b7280;
     font-family:'Noto Sans TC','PingFang TC',sans-serif;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   
-  /* 修正 iOS Safari 高度與滾動問題 */
   html,body{margin:0;height:100%;min-height:-webkit-fill-available;background:var(--ink);overflow:hidden;}
   body{display:flex;justify-content:center;}
   
   #app{
-    width:100%;max-width:480px;height:100dvh; /* 使用 dvh 適應動態網址列 */
+    width:100%;max-width:480px;height:100dvh;
     position:relative;background:var(--paper);
     display:flex;flex-direction:column;overflow:hidden;
     box-shadow:0 0 40px rgba(0,0,0,.5);
   }
 
-  /* ---------- HEADER ---------- */
+  /* HEADER */
   #header{
-    background:var(--ink);color:var(--paper);
-    padding:10px 14px 12px;flex:0 0 auto;
-    display:flex;flex-direction:column;gap:10px;z-index:40;
-    border-bottom:3px solid var(--signal);
+    background:var(--ink);color:var(--paper); padding:10px 14px 12px;flex:0 0 auto;
+    display:flex;flex-direction:column;gap:10px;z-index:40; border-bottom:3px solid var(--signal);
   }
   .header-top{display:flex;align-items:center;justify-content:space-between;gap:6px;}
   .loc-block{display:flex;flex-direction:column;line-height:1.1;flex:1;}
@@ -68,7 +56,6 @@
   .sync-icon.spin{animation:spin .9s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
-  /* Search Bar */
   .header-search {
     display: flex; align-items: center; background: var(--ink-soft); border-radius: 8px;
     padding: 6px 10px; border: 1px solid #3a4055;
@@ -82,16 +69,27 @@
     background: transparent; border: none; color: var(--paper-dim); cursor: pointer; padding: 2px 4px; display:none; font-size:14px;
   }
 
-  /* ---------- MAP ---------- */
+  /* MAP */
   #mapwrap{position:relative;flex:1 1 auto;min-height:0;}
   #map{width:100%;height:100%;}
   .leaflet-control-attribution{font-size:9px;}
+
+  /* Floating Action Button (新增地點) */
+  #addStoreFab {
+    position: absolute; right: 14px; bottom: 85px; z-index: 400;
+    background: var(--signal); color: #1a0d05; border: none;
+    width: 52px; height: 52px; border-radius: 50%; font-size: 26px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.35); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.15s; padding-bottom:4px;
+  }
+  #addStoreFab:active { transform: scale(0.92); }
 
   .toast{
     position:absolute;left:50%;top:14px;transform:translate(-50%,-140%);
     background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:999px;
     font-size:12.5px;font-weight:500;box-shadow:0 6px 18px rgba(0,0,0,.35);
-    display:flex;align-items:center;gap:7px;z-index:60;transition:transform .28s cubic-bezier(.2,.8,.3,1.1);
+    display:flex;align-items:center;gap:7px;z-index:450;transition:transform .28s cubic-bezier(.2,.8,.3,1.1);
     white-space:nowrap;
   }
   .toast.show{transform:translate(-50%,0);}
@@ -104,18 +102,16 @@
   .legend span{display:flex;align-items:center;gap:4px;}
   .legend i{width:8px;height:8px;border-radius:50%;display:inline-block;}
 
-  /* leaflet marker pulse */
   .pin{width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4);position:relative;}
   .pin.pulse::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid currentColor;animation:pulse 1.8s ease-out infinite;transform:rotate(0);}
   @keyframes pulse{0%{transform:scale(.5) rotate(45deg);opacity:.9;}100%{transform:scale(1.9) rotate(45deg);opacity:0;}}
 
-  /* ---------- BOTTOM SHEET ---------- */
+  /* BOTTOM SHEET */
   #sheet{
     position:relative;flex:0 0 auto;background:var(--paper);
     border-top:1px solid var(--line);
     display:flex;flex-direction:column;min-height:40dvh;height:40dvh;
-    z-index:35;touch-action:none;
-    box-shadow:0 -6px 20px rgba(0,0,0,.15);
+    z-index:35;touch-action:none; box-shadow:0 -6px 20px rgba(0,0,0,.15);
     transition:height .25s cubic-bezier(.2,.8,.3,1);
   }
   #sheet.dragging{transition:none;}
@@ -149,9 +145,8 @@
     background:#e6f4ea;color:#166534;border:1px solid #bbf7d0;font-size:10.5px;font-weight:700;
     padding:3px 7px;border-radius:6px;
   }
-  .tag.warn{
-    background:#fff4e0;color:#8a5300;border:1px solid #f2cf8f;
-  }
+  .tag.warn{background:#fff4e0;color:#8a5300;border:1px solid #f2cf8f;}
+  .tag.custom{background:#f3e8ff;color:#6b21a8;border:1px solid #d8b4fe;}
   .status-chip{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;align-self:flex-start;}
   .status-chip.status-new{background:#e7f0ff;color:var(--blue);}
   .status-chip.status-negotiating{background:#fef3d6;color:#9a6a00;}
@@ -166,9 +161,9 @@
   .abtn.nav{background:var(--ink);}
   .abtn.call{background:#3a4055;}
   .abtn.record{background:var(--signal);}
-  .empty-state{text-align:center;padding:30px 10px;color:var(--text-dim);font-size:13px;}
+  .empty-state{text-align:center;padding:30px 10px;color:var(--text-dim);font-size:13px;line-height:1.6;}
 
-  /* ---------- MODAL SHELL ---------- */
+  /* MODALS */
   .overlay{
     position:absolute;inset:0;background:rgba(15,17,22,.55);z-index:80;
     display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .2s;
@@ -176,28 +171,19 @@
   .overlay.show{opacity:1;pointer-events:auto;}
   .modal{
     background:var(--paper);width:100%;border-radius:20px 20px 0 0;
-    max-height:85dvh; /* 確保不會超過畫面高度 */
-    display:flex;flex-direction:column;
+    max-height:85dvh; display:flex;flex-direction:column;
     transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.25,1);
   }
   .overlay.show .modal{transform:translateY(0);}
   .modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px;border-bottom:1px solid var(--line);flex:0 0 auto;}
   .modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;color:var(--ink);}
   .modal-close{width:30px;height:30px;border-radius:50%;background:var(--paper-dim);border:none;font-size:16px;cursor:pointer;color:var(--ink);}
-  
-  /* 修正內部滾動問題 */
   .modal-body{
-    padding:14px 18px 10px; overflow-y:auto; flex:1 1 auto;
-    min-height:0; /* 重要：讓 flex 子元素可以正常縮小並出現捲動軸 */
-    -webkit-overflow-scrolling:touch;
+    padding:14px 18px 10px; overflow-y:auto; flex:1 1 auto; min-height:0; -webkit-overflow-scrolling:touch;
   }
-  
   .modal-foot{
-    /* padding-bottom 加上 iOS 安全區域，避免被底線擋住 */
     padding:12px 18px max(18px, env(safe-area-inset-bottom));
-    flex:0 0 auto;border-top:1px solid var(--line);
-    background:var(--paper); /* 確保底部不會透明 */
-    z-index: 10;
+    flex:0 0 auto;border-top:1px solid var(--line); background:var(--paper); z-index: 10;
   }
   
   .primary-btn{
@@ -206,7 +192,6 @@
   }
   .primary-btn:active{transform:scale(.98);}
 
-  /* filter form */
   .f-group{margin-bottom:18px;}
   .f-label{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
   .f-label .n{font-family:'JetBrains Mono',monospace;color:var(--signal);}
@@ -217,7 +202,6 @@
   }
   .chip-opt.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
 
-  /* record modal */
   .status-select{display:flex;gap:6px;margin-bottom:16px;}
   .status-opt{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 2px;text-align:center;font-size:11.5px;font-weight:700;color:var(--text-dim);cursor:pointer;}
   .status-opt .dotc{width:9px;height:9px;border-radius:50%;margin:0 auto 5px;}
@@ -237,11 +221,12 @@
   .photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
   .photo-thumb .meta{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff;font-size:7.5px;padding:3px 4px;line-height:1.3;font-family:'JetBrains Mono',monospace;}
 
-  textarea.note{
-    width:100%;min-height:96px;border-radius:10px;border:1.5px solid var(--line);padding:10px;font-size:13.5px;
-    font-family:'Noto Sans TC',sans-serif;resize:vertical;background:#fff;color:var(--ink);
+  textarea.note, input.txt{
+    width:100%;border-radius:10px;border:1.5px solid var(--line);padding:10px;font-size:13.5px;
+    font-family:'Noto Sans TC',sans-serif;background:#fff;color:var(--ink);
   }
-  textarea.note:focus{outline:2px solid var(--signal);outline-offset:1px;}
+  textarea.note{min-height:96px;resize:vertical;}
+  textarea.note:focus, input.txt:focus{outline:2px solid var(--signal);outline-offset:1px;}
   .voice-hint{font-size:10.5px;color:var(--text-dim);margin-top:5px;display:flex;align-items:center;gap:5px;}
 </style>
 </head>
@@ -268,6 +253,7 @@
 
   <div id="mapwrap">
     <div id="map"></div>
+    <button id="addStoreFab" title="手動建立店家">➕</button>
     <div class="toast" id="toast"><span class="dot"></span><span id="toastMsg"></span></div>
     <div class="legend">
       <span><i style="background:#2f7dfb"></i>未拜訪</span>
@@ -282,11 +268,26 @@
     <div id="list"></div>
   </div>
 
-  <!-- FILTER MODAL -->
+  <!-- FILTER & SETTINGS MODAL -->
   <div class="overlay" id="filterOverlay">
     <div class="modal">
       <div class="modal-head"><span class="modal-title">系統設定與篩選</span><button class="modal-close" id="filterCloseX">✕</button></div>
       <div class="modal-body">
+        
+        <div class="f-group" style="background:#f0f5ff; padding:12px; border-radius:10px; border:1px solid #d1e3ff;">
+          <div class="f-label" style="color:#004085;">👤 業務員姓名 (匯出報表用)</div>
+          <input type="text" id="salesNameInput" class="txt" placeholder="請輸入你的姓名/代號" style="border-color:#a3c5ff;">
+        </div>
+
+        <div class="f-group">
+          <div class="f-label">排除特定店家 <span class="n">必備過濾</span></div>
+          <div class="chips" id="excludeChips">
+            <div class="chip-opt" data-v="excludeConv">排除便利商店</div>
+            <div class="chip-opt" data-v="excludeChains">排除常見連鎖品牌</div>
+          </div>
+          <div class="voice-hint">過濾掉 7-11、全家、星巴克、連鎖藥妝與量販等</div>
+        </div>
+
         <div class="f-group">
           <div class="f-label">搜尋半徑</div>
           <div class="chips" id="radiusChips">
@@ -295,17 +296,9 @@
             <div class="chip-opt" data-v="3000">3km</div>
           </div>
         </div>
+
         <div class="f-group">
-          <div class="f-label">成立時間（推估）</div>
-          <div class="chips" id="foundedChips">
-            <div class="chip-opt" data-v="new">1年內新開幕</div>
-            <div class="chip-opt" data-v="old">1～3年老店</div>
-            <div class="chip-opt on" data-v="all">全選</div>
-          </div>
-        </div>
-        <!-- 正向篩選條件 -->
-        <div class="f-group">
-          <div class="f-label">數位資產條件 <span class="n">多選</span></div>
+          <div class="f-label">數位資產條件 <span class="n">多選/正向篩選</span></div>
           <div class="chips" id="featureChips">
             <div class="chip-opt" data-v="hasWebsite">有官方網站</div>
             <div class="chip-opt" data-v="hasFB">有 FB 粉專</div>
@@ -314,27 +307,43 @@
           </div>
         </div>
         
-        <!-- 雲端同步設定 -->
         <div class="f-group" style="border-top:1px dashed var(--line); padding-top:16px; margin-top:20px;">
           <div class="f-label">☁️ 雲端同步設定 (Google Sheets)</div>
-          
-          <!-- 未設定或編輯模式 -->
           <div id="gasConfigMode" style="display:none; gap:6px; margin-bottom:6px;">
-            <input type="text" id="gasUrlInput" placeholder="請貼上 Apps Script 接收碼網址" style="flex:1; padding:10px; border-radius:8px; border:1.5px solid var(--line); font-size:12px; font-family:monospace; background:#fff;">
-            <button id="saveGasBtn" style="background:var(--ink); color:var(--paper); border:none; border-radius:8px; padding:0 12px; font-weight:bold; cursor:pointer; white-space:nowrap;">儲存</button>
+            <input type="text" id="gasUrlInput" class="txt" placeholder="請貼上 Apps Script 接收碼網址" style="flex:1; font-family:monospace;">
+            <button id="saveGasBtn" style="background:var(--ink); color:var(--paper); border:none; border-radius:10px; padding:0 12px; font-weight:bold; cursor:pointer; white-space:nowrap;">儲存</button>
           </div>
-          
-          <!-- 已設定模式 -->
-          <div id="gasSavedMode" style="display:none; align-items:center; justify-content:space-between; background:#e6f4ea; border:1px solid #bbf7d0; padding:10px 12px; border-radius:8px; margin-bottom:6px;">
+          <div id="gasSavedMode" style="display:none; align-items:center; justify-content:space-between; background:#e6f4ea; border:1px solid #bbf7d0; padding:10px 12px; border-radius:10px; margin-bottom:6px;">
             <div style="font-size:12.5px; font-weight:700; color:#166534;">✅ 已綁定雲端表格</div>
             <button id="editGasBtn" style="background:transparent; border:1px solid #166534; color:#166534; border-radius:6px; padding:4px 10px; font-size:11.5px; font-weight:bold; cursor:pointer;">變更</button>
           </div>
-
           <div class="voice-hint">💡 設定後，按下右上角「匯出」將直接寫入雲端，否則為下載 Excel 檔。</div>
         </div>
-
       </div>
       <div class="modal-foot"><button class="primary-btn" id="applyFilter">套用設定</button></div>
+    </div>
+  </div>
+
+  <!-- ADD STORE MODAL -->
+  <div class="overlay" id="addStoreOverlay">
+    <div class="modal">
+      <div class="modal-head"><span class="modal-title">新增自訂店家</span><button class="modal-close" id="addStoreCloseX">✕</button></div>
+      <div class="modal-body">
+        <div class="voice-hint" style="margin-bottom:16px; color:var(--signal); font-weight:bold;">📍 將以目前地圖「正中心」為店家座標建立</div>
+        <div class="f-group">
+          <div class="f-label">店家名稱 <span style="color:var(--red);">*</span></div>
+          <input type="text" id="newStoreName" class="txt" placeholder="請輸入完整店名">
+        </div>
+        <div class="f-group">
+          <div class="f-label">行業分類</div>
+          <input type="text" id="newStoreCat" class="txt" placeholder="例如：餐飲、零售、醫美...">
+        </div>
+        <div class="f-group">
+          <div class="f-label">地址 (選填)</div>
+          <input type="text" id="newStoreAddr" class="txt" placeholder="請輸入門牌地址">
+        </div>
+      </div>
+      <div class="modal-foot"><button class="primary-btn" id="saveNewStore">建立並打卡</button></div>
     </div>
   </div>
 
@@ -343,9 +352,7 @@
     <div class="modal">
       <div class="modal-head"><span class="modal-title" id="recordTitle">拜訪紀錄</span><button class="modal-close" id="recordCloseX">✕</button></div>
       <div class="modal-body">
-        <div id="recordStoreInfo" style="margin-bottom: 16px; font-size: 12.5px; color: var(--text-dim); line-height: 1.5;">
-          <!-- 動態插入商家資訊 -->
-        </div>
+        <div id="recordStoreInfo" style="margin-bottom: 16px; font-size: 12.5px; color: var(--text-dim); line-height: 1.5;"></div>
         <div class="status-select" id="statusSelect">
           <div class="status-opt" data-s="new"><div class="dotc"></div>未拜訪</div>
           <div class="status-opt" data-s="negotiating"><div class="dotc"></div>洽談中</div>
@@ -376,20 +383,20 @@
 (function(){
   const STATUS_COLOR = {new:'#2f7dfb', negotiating:'#f2a70b', won:'#1bad6b', lost:'#e3403a'};
   const STATUS_LABEL = {new:'未拜訪', negotiating:'洽談中', won:'已成功簽約', lost:'已拒絕'};
+  const CENTER = {lat:24.1508, lng:120.6650}; 
 
-  const CENTER = {lat:24.1508, lng:120.6650}; // near Taichung West/North boundary
+  // 常見連鎖品牌過濾關鍵字
+  const CHAIN_KEYWORDS = ['7-11','7-eleven','全家','萊爾富','ok超商','麥當勞','肯德基','摩斯','星巴克','路易莎','50嵐','清心','屈臣氏','康是美','寶雅','全聯','家樂福','八方雲集','大苑子','茶湯會','可不可','迷客夏','cama','拿坡里','達美樂','必勝客'];
 
-  // 配合新的正向邏輯修改示範資料
   const RAW_STORES = [
     {id:'s1', name:'金旺五金行', cat:'五金百貨', addr:'台中市西區大隆路12號', lat:24.1487, lng:120.6612, founded:'old', hasWebsite:false, hasFB:false, hasIG:false, hasLine:false},
     {id:'s2', name:'順心早午餐', cat:'餐飲', addr:'台中市西區存中街45號', lat:24.1523, lng:120.6631, founded:'new', hasWebsite:false, hasFB:true, hasIG:true, hasLine:false},
-    {id:'s3', name:'安可牙醫診所', cat:'醫療診所', addr:'台中市西區美村路一段88號', lat:24.1461, lng:120.6685, founded:'old', hasWebsite:false, hasFB:false, hasIG:false, hasLine:false},
-    {id:'s4', name:'巷口洗衣坊', cat:'生活服務', addr:'台中市西區永順街20號', lat:24.1549, lng:120.6668, founded:'old', hasWebsite:false, hasFB:true, hasIG:false, hasLine:false}
+    {id:'s3', name:'全家便利商店(測試)', cat:'便利商店', addr:'台中市西區測試路1號', lat:24.1511, lng:120.6640, founded:'old', hasWebsite:true, hasFB:false, hasIG:false, hasLine:false},
   ];
 
-  // 加入 lastUpdated 屬性來記錄更新時間
   let stores = RAW_STORES.map(s => Object.assign({status:'new', note:'', photos:[], source:'demo', lastUpdated: null}, s));
-  let filters = {radius:1000, founded:'all', features:[]};
+  let customStores = []; 
+  let filters = {radius:1000, features:[], excludeConv: false, excludeChains: false};
   let userLoc = {lat:CENTER.lat, lng:CENTER.lng};
   let activeStoreId = null;
   let hasRealData = false;
@@ -404,34 +411,26 @@
 
   function tagsFor(s){
     const t=[];
+    if(s.source === 'custom') t.push('<span class="tag custom">✏️ 自訂新增</span>');
     if(s.hasWebsite) t.push('<span class="tag">🌐 官方網站</span>');
     if(s.hasFB) t.push('<span class="tag">📘 FB 專頁</span>');
     if(s.hasIG) t.push('<span class="tag">📷 IG 帳號</span>');
     if(s.hasLine) t.push('<span class="tag">💬 LINE 官方</span>');
-    if(t.length === 0) t.push('<span class="tag warn">⚠️ 無數位足跡</span>');
+    if(t.length === 0 || (t.length===1 && s.source==='custom')) t.push('<span class="tag warn">⚠️ 無數位足跡</span>');
     return t;
   }
 
-  // ---------- MAP SETUP ----------
   const map = L.map('map', {zoomControl:false, attributionControl:true}).setView([CENTER.lat, CENTER.lng], 13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom:19, attribution:'&copy; OpenStreetMap'
-  }).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
 
-  const userMarker = L.circleMarker([userLoc.lat, userLoc.lng], {
-    radius:7, color:'#fff', weight:2, fillColor:'#ff5e2c', fillOpacity:1
-  }).addTo(map).bindTooltip('目前位置');
+  const userMarker = L.circleMarker([userLoc.lat, userLoc.lng], {radius:7, color:'#fff', weight:2, fillColor:'#ff5e2c', fillOpacity:1}).addTo(map).bindTooltip('目前位置');
 
   let markers = {};
   function makeIcon(status){
     const c = STATUS_COLOR[status];
     const pulse = status==='new' ? 'pulse' : '';
-    return L.divIcon({
-      className:'',
-      html:`<div class="pin ${pulse}" style="background:${c};color:${c}"></div>`,
-      iconSize:[22,22], iconAnchor:[11,20]
-    });
+    return L.divIcon({ className:'', html:`<div class="pin ${pulse}" style="background:${c};color:${c}"></div>`, iconSize:[22,22], iconAnchor:[11,20] });
   }
   function rebuildMarkers(){
     Object.values(markers).forEach(m => map.removeLayer(m));
@@ -450,10 +449,10 @@
       userMarker.setLatLng([userLoc.lat, userLoc.lng]);
       map.setView([userLoc.lat, userLoc.lng], 15);
       render();
-    }, ()=>{ /* fallback stays at CENTER */ }, {timeout:4000});
+    }, ()=>{}, {timeout:4000});
   }
 
-  // ---------- SEARCH BAR ----------
+  // SEARCH BAR
   document.getElementById('searchInput').addEventListener('input', e => {
     searchQuery = e.target.value.trim().toLowerCase();
     document.getElementById('clearSearch').style.display = searchQuery ? 'block' : 'none';
@@ -466,24 +465,25 @@
     render();
   });
 
-  // ---------- LIST / FILTER RENDER ----------
+  // LIST / FILTER RENDER
   function passesFilter(s, center){
-    // 關鍵字搜尋 (名稱或地址)
     if(searchQuery) {
       const nameMatch = s.name.toLowerCase().includes(searchQuery);
       const addrMatch = (s.addr || '').toLowerCase().includes(searchQuery);
       if(!nameMatch && !addrMatch) return false;
     }
     
-    // 如果有搜尋字詞，就忽略距離限制，讓使用者能找到已經抓進來的店
     const d = haversine(center, s);
     if(!searchQuery && d > filters.radius) return false;
     
-    if(filters.founded !== 'all' && s.founded !== filters.founded) return false;
-    
-    // 正向篩選：如果勾選了「有官方網站」，那這家店就必須要有 (every 邏輯)
+    // 排除特定店家邏輯
+    if(filters.excludeConv && s.cat === '便利商店') return false;
+    if(filters.excludeChains) {
+       const lowerName = s.name.toLowerCase();
+       if(CHAIN_KEYWORDS.some(k => lowerName.includes(k))) return false;
+    }
+
     if(filters.features.length > 0 && !filters.features.every(f => s[f])) return false;
-    
     return true;
   }
 
@@ -497,14 +497,14 @@
     Object.entries(markers).forEach(([id,m])=>{
       const s = stores.find(x=>x.id===id);
       const show = passesFilter(s, center);
-      m.setOpacity(show ? 1 : 0.18); // 隱藏未符合篩選的圖釘
-      if(show) m.setZIndexOffset(1000); else m.setZIndexOffset(0); // 讓符合的顯示在最上層
+      m.setOpacity(show ? 1 : 0.18);
+      if(show) m.setZIndexOffset(1000); else m.setZIndexOffset(0);
       m.setIcon(makeIcon(s.status));
     });
 
     const list = document.getElementById('list');
     if(!visible.length){
-      list.innerHTML = `<div class="empty-state">此範圍內沒有符合條件的店家<br>試試放寬篩選半徑、搜尋字詞，或按「更新」重新抓取</div>`;
+      list.innerHTML = `<div class="empty-state">此範圍內沒有符合條件的店家<br>試試放寬篩選半徑、搜尋字詞，或按右上角「更新」重新抓取<br><br>如果您在現場，也可點擊地圖右下角的 ➕ 自行新增店家</div>`;
       return;
     }
     list.innerHTML = visible.map(s=>{
@@ -513,10 +513,7 @@
       <div class="card status-${s.status}" data-id="${s.id}">
         <div class="status-chip status-${s.status}">${STATUS_LABEL[s.status]}</div>
         <div class="card-top">
-          <div>
-            <div class="card-name">${s.name}</div>
-            <div class="card-meta">${s.cat}</div>
-          </div>
+          <div><div class="card-name">${s.name}</div><div class="card-meta">${s.cat}</div></div>
           <div class="card-dist">${s.dist}m<small>距離中心</small></div>
         </div>
         <div class="card-addr">${s.addr || '地址未提供'}</div>
@@ -530,35 +527,26 @@
     }).join('');
   }
 
-  // 點擊卡片將地圖平移至該店家 (或點擊按鈕執行對應動作)
   document.getElementById('list').addEventListener('click', e=>{
     const btn = e.target.closest('.abtn');
     const card = e.target.closest('.card');
-    
     if(btn){
       const id = btn.dataset.id;
       const s = stores.find(x=>x.id===id);
-      if(btn.dataset.act === 'nav'){
-        window.open(`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`, '_blank');
-      } else if(btn.dataset.act === 'call'){
-        showToast('示範資料無實際電話號碼', '📞');
-      } else if(btn.dataset.act === 'record'){
-        openRecord(id);
-      }
+      if(btn.dataset.act === 'nav'){ window.open(`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`, '_blank');
+      } else if(btn.dataset.act === 'call'){ showToast('無實際電話號碼', '📞');
+      } else if(btn.dataset.act === 'record'){ openRecord(id); }
       return;
     }
-    
-    // 如果是點擊卡片本身 (非按鈕)，就將地圖移動到該店
     if(card) {
       const id = card.dataset.id;
       const s = stores.find(x=>x.id===id);
       map.setView([s.lat, s.lng], 16, {animate: true});
-      // 在小螢幕上自動把 Bottom Sheet 縮下去一半，方便看地圖
       setSheetVh(40); 
     }
   });
 
-  // ---------- TOAST ----------
+  // TOAST
   let toastTimer;
   function showToast(msg){
     const t = document.getElementById('toast');
@@ -568,75 +556,82 @@
     toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
   }
 
-  // ---------- REAL DATA: OpenStreetMap Overpass ----------
+  // ADD CUSTOM STORE
+  document.getElementById('addStoreFab').addEventListener('click', () => {
+    document.getElementById('newStoreName').value = '';
+    document.getElementById('newStoreCat').value = '';
+    document.getElementById('newStoreAddr').value = '';
+    document.getElementById('addStoreOverlay').classList.add('show');
+  });
+  document.getElementById('addStoreCloseX').addEventListener('click', () => { document.getElementById('addStoreOverlay').classList.remove('show'); });
+
+  document.getElementById('saveNewStore').addEventListener('click', () => {
+    const name = document.getElementById('newStoreName').value.trim();
+    if (!name) return showToast('❌ 請輸入店家名稱');
+    
+    const cat = document.getElementById('newStoreCat').value.trim() || '其他';
+    const addr = document.getElementById('newStoreAddr').value.trim();
+    const center = map.getCenter();
+    const newId = 'custom-' + Date.now();
+    
+    const newStore = {
+      id: newId, name: name, cat: cat, addr: addr,
+      lat: center.lat, lng: center.lng,
+      founded: 'unknown', hasWebsite: false, hasFB: false, hasIG: false, hasLine: false,
+      source: 'custom', status: 'new', note: '', photos: [], lastUpdated: null
+    };
+
+    customStores.push(newStore);
+    stores.push(newStore);
+    try { localStorage.setItem('customStores', JSON.stringify(customStores)); } catch(e){}
+
+    rebuildMarkers();
+    render();
+    document.getElementById('addStoreOverlay').classList.remove('show');
+    showToast('✅ 成功新增地標！');
+    setTimeout(() => openRecord(newId), 300);
+  });
+
+  // REAL DATA OVERPASS
   const OSM_CATEGORY_MAP = {
-    'shop:convenience':'便利商店', 'shop:supermarket':'超市', 'shop:bakery':'烘焙',
-    'shop:clothes':'服飾', 'shop:hairdresser':'美髮', 'shop:beauty':'美容',
-    'shop:electronics':'電子3C', 'shop:mobile_phone':'手機通訊', 'shop:optician':'眼鏡',
-    'shop:pet':'寵物用品', 'shop:florist':'花店', 'shop:car_repair':'汽修',
-    'shop:bicycle':'自行車', 'shop:hardware':'五金', 'shop:doityourself':'DIY賣場',
-    'shop:books':'書店', 'shop:laundry':'洗衣', 'shop:jewelry':'珠寶飾品',
-    'shop:shoes':'鞋類', 'shop:furniture':'家具', 'shop:variety_store':'雜貨店',
-    'shop:butcher':'肉舖', 'shop:tea':'茶行', 'shop:photo':'相館',
-    'amenity:restaurant':'餐廳', 'amenity:cafe':'咖啡廳', 'amenity:fast_food':'速食',
-    'amenity:bar':'酒吧', 'amenity:pub':'酒吧', 'amenity:pharmacy':'藥局',
-    'amenity:bank':'銀行', 'amenity:clinic':'診所', 'amenity:dentist':'牙醫診所',
-    'amenity:veterinary':'獸醫院', 'amenity:driving_school':'駕訓班',
-    'amenity:fitness_centre':'健身中心', 'amenity:kindergarten':'幼兒園'
+    'shop:convenience':'便利商店', 'shop:supermarket':'超市', 'shop:bakery':'烘焙', 'shop:clothes':'服飾', 'shop:hairdresser':'美髮',
+    'shop:electronics':'電子3C', 'shop:optician':'眼鏡', 'shop:pet':'寵物用品', 'shop:florist':'花店', 'shop:car_repair':'汽修',
+    'shop:hardware':'五金', 'amenity:restaurant':'餐廳', 'amenity:cafe':'咖啡廳', 'amenity:fast_food':'速食',
+    'amenity:pharmacy':'藥局', 'amenity:clinic':'診所', 'amenity:dentist':'牙醫診所'
   };
   function osmCategory(tags){
     for(const key of ['shop','amenity']){
-      if(tags[key]){
-        const label = OSM_CATEGORY_MAP[key+':'+tags[key]];
-        if(label) return label;
-        return tags[key];
-      }
+      if(tags[key]){ const label = OSM_CATEGORY_MAP[key+':'+tags[key]]; return label || '其他'; }
     }
     return '其他';
   }
   function osmAddress(tags){
     if(tags['addr:full']) return tags['addr:full'];
-    const parts = [tags['addr:city'], tags['addr:district'], tags['addr:street'], tags['addr:housenumber']].filter(Boolean);
-    return parts.join('');
+    return [tags['addr:city'], tags['addr:district'], tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join('');
   }
   function buildOverpassQuery(lat, lng, radiusM){
-    return `[out:json][timeout:25];(
-      node["shop"]["name"](around:${radiusM},${lat},${lng});
-      node["amenity"~"restaurant|cafe|fast_food|bar|pub|pharmacy|bank|clinic|dentist|veterinary|driving_school|fitness_centre|kindergarten"]["name"](around:${radiusM},${lat},${lng});
-    );out body;`;
+    return `[out:json][timeout:25];(node["shop"]["name"](around:${radiusM},${lat},${lng});node["amenity"~"restaurant|cafe|fast_food|bar|pub|pharmacy|bank|clinic|dentist|veterinary|driving_school|fitness_centre|kindergarten"]["name"](around:${radiusM},${lat},${lng}););out body;`;
   }
 
   async function fetchRealStores(){
     const icon = document.getElementById('syncIcon');
     icon.classList.add('spin');
     showToast('正在向 OpenStreetMap 查詢畫面中心附近店家…');
-    
     const currentCenter = map.getCenter();
-    
     try{
-      const query = buildOverpassQuery(currentCenter.lat, currentCenter.lng, filters.radius);
-      const res = await fetch('https://overpass-api.de/api/interpreter', {
-        method:'POST', body:'data='+encodeURIComponent(query)
-      });
-      if(!res.ok) throw new Error('overpass_http_'+res.status);
+      const res = await fetch('https://overpass-api.de/api/interpreter', { method:'POST', body:'data='+encodeURIComponent(buildOverpassQuery(currentCenter.lat, currentCenter.lng, filters.radius)) });
+      if(!res.ok) throw new Error();
       const data = await res.json();
       const elements = (data.elements || []).filter(el => el.tags && el.tags.name);
-
       if(!elements.length){
         showToast('這個範圍內查不到已登記的店家，試試放大搜尋半徑或移動地圖');
-        icon.classList.remove('spin');
-        return;
+        icon.classList.remove('spin'); return;
       }
-
       const fetched = elements.map(el=>{
         const tags = el.tags;
         return {
-          id: 'osm-'+el.id,
-          name: tags.name,
-          cat: osmCategory(tags),
-          addr: osmAddress(tags),
-          lat: el.lat, lng: el.lon,
-          founded: 'unknown',
+          id: 'osm-'+el.id, name: tags.name, cat: osmCategory(tags), addr: osmAddress(tags),
+          lat: el.lat, lng: el.lon, founded: 'unknown',
           hasWebsite: !!(tags.website || tags['contact:website']),
           hasFB: !!(tags['contact:facebook'] || tags.facebook),
           hasIG: !!(tags['contact:instagram'] || tags.instagram),
@@ -645,274 +640,160 @@
         };
       });
 
-      // preserve any previously saved visit records
+      fetched.push(...customStores);
       fetched.forEach(s=>{
         try{
           const raw = localStorage.getItem('visit:'+s.id);
-          if(raw){
-            const saved = JSON.parse(raw);
-            s.status = saved.status || s.status;
-            s.note = saved.note || '';
-            s.photos = saved.photos || [];
-            s.lastUpdated = saved.lastUpdated || null;
-          }
+          if(raw){ const saved = JSON.parse(raw); s.status = saved.status; s.note = saved.note; s.photos = saved.photos; s.lastUpdated = saved.lastUpdated; }
         }catch(err){}
       });
 
-      stores = fetched;
-      hasRealData = true;
-      rebuildMarkers();
-      render();
-      showToast(`已從 OpenStreetMap 抓到 ${fetched.length} 間附近店家`);
-    }catch(err){
-      showToast('查詢失敗，請檢查網路連線後再試一次');
-    }
+      stores = fetched; hasRealData = true; rebuildMarkers(); render();
+      showToast(`已抓到 ${fetched.length - customStores.length} 間附近店家`);
+    }catch(err){ showToast('查詢失敗，請檢查網路連線後再試一次'); }
     icon.classList.remove('spin');
   }
-
-  // ---------- SYNC BUTTON ----------
   document.getElementById('syncBtn').addEventListener('click', fetchRealStores);
 
-  // ---------- EXPORT BUTTON (Excel OR Google Sheets Sync) ----------
+  // EXPORT (EXCEL / GAS)
   document.getElementById('exportBtn').addEventListener('click', () => {
-    const now = new Date();
-    // 取得今天凌晨 00:00 的 Timestamp
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    
-    // 篩出有 lastUpdated 且時間在今天之內的店家
+    const startOfToday = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime();
     const todayRecords = stores.filter(s => s.lastUpdated && s.lastUpdated >= startOfToday);
     
-    if(todayRecords.length === 0){
-      showToast('今天尚無任何拜訪或更新紀錄！');
-      return;
-    }
+    if(todayRecords.length === 0) return showToast('今天尚無任何拜訪紀錄！');
 
     const gasUrl = localStorage.getItem('gasUrl');
+    const salesName = localStorage.getItem('salesName') || '未設定姓名';
     
-    // 整理要匯出的純資料 Array
     const rowData = todayRecords.map(s => [
-      s.name || '',
-      s.cat || '',
-      s.addr || '',
-      STATUS_LABEL[s.status] || '',
-      s.note || '',
+      salesName, s.name || '', s.cat || '', s.addr || '',
+      STATUS_LABEL[s.status] || '', s.note || '',
       new Date(s.lastUpdated).toLocaleTimeString('zh-TW', {hour12:false})
     ]);
 
-    // 如果使用者有設定 Google Apps Script 網址，就嘗試推送到雲端
     if (gasUrl && gasUrl.startsWith('https://script.google.com')) {
       showToast('☁️ 正在同步至 Google 雲端試算表...');
-      
+      // 修正：使用 no-cors 模式避開跨域阻擋，強制推送
       fetch(gasUrl, {
-        method: 'POST',
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(rowData) 
-      })
-      .then(res => res.json())
-      .then(data => {
-        showToast(`✅ 成功！已將 ${todayRecords.length} 筆紀錄寫入雲端表單`);
-      })
-      .catch(err => {
-        // 部分跨域情況下就算成功也會報錯，因此直接顯示成功提示也可視為完成
-        showToast('✅ 成功送出至 Google 表單 (請至雲端確認)');
+      }).then(() => {
+        showToast(`✅ 成功！已將 ${todayRecords.length} 筆紀錄送出至雲端`);
+      }).catch(err => {
+        showToast('❌ 同步失敗，請檢查網路');
       });
-      
     } else {
-      // 若沒有設定網址，則走原本的本機下載 Excel 流程
-      if(typeof XLSX === 'undefined') {
-        showToast('匯出套件載入中，請稍後再試...');
-        return;
-      }
-
-      const excelData = [
-        ['店名', '分類', '地址', '狀態', '備註', '最後更新時間'],
-        ...rowData
-      ];
-
-      // 產生 Excel Workbook
+      if(typeof XLSX === 'undefined') return showToast('匯出套件載入中，請稍後...');
+      const excelData = [['業務員', '店名', '分類', '地址', '狀態', '備註', '最後更新時間'], ...rowData];
       const ws = XLSX.utils.aoa_to_sheet(excelData);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "今日地推紀錄");
-
-      // 產生檔名並匯出 xlsx 格式
-      const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
-      XLSX.writeFile(wb, `地推紀錄匯報_${dateStr}.xlsx`);
-      
-      showToast(`已成功下載 ${todayRecords.length} 筆今日紀錄 (Excel檔)！`);
+      XLSX.utils.book_append_sheet(wb, ws, "今日紀錄");
+      XLSX.writeFile(wb, `地推紀錄匯報_${salesName}_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showToast(`已下載 ${todayRecords.length} 筆今日紀錄 (Excel檔)！`);
     }
   });
 
-
-  // ---------- BOTTOM SHEET DRAG ----------
-  const sheet = document.getElementById('sheet');
-  const handle = document.getElementById('handle');
-  const SNAPS = {peek:14, half:40, full:78}; // vh
+  // DRAG SHEET
+  const sheet = document.getElementById('sheet'), handle = document.getElementById('handle'), SNAPS = {peek:14, half:40, full:78}; 
   let dragStartY=0, dragStartH=0, dragging=false;
-
   function setSheetVh(vh){ sheet.style.height = vh+'dvh'; }
-
-  function onDown(y){
-    dragging=true; sheet.classList.add('dragging');
-    dragStartY=y; dragStartH = sheet.getBoundingClientRect().height / window.innerHeight * 100;
-  }
-  function onMove(y){
-    if(!dragging) return;
-    const deltaVh = (dragStartY - y) / window.innerHeight * 100;
-    let vh = Math.min(85, Math.max(10, dragStartH + deltaVh));
-    setSheetVh(vh);
-  }
+  function onDown(y){ dragging=true; sheet.classList.add('dragging'); dragStartY=y; dragStartH = sheet.getBoundingClientRect().height / window.innerHeight * 100; }
+  function onMove(y){ if(!dragging) return; setSheetVh(Math.min(85, Math.max(10, dragStartH + ((dragStartY - y)/window.innerHeight*100)))); }
   function onUp(){
-    if(!dragging) return;
-    dragging=false; sheet.classList.remove('dragging');
+    if(!dragging) return; dragging=false; sheet.classList.remove('dragging');
     const curVh = sheet.getBoundingClientRect().height / window.innerHeight * 100;
     const dists = Object.entries(SNAPS).map(([k,v])=>[k, Math.abs(v-curVh)]).sort((a,b)=>a[1]-b[1]);
     setSheetVh(SNAPS[dists[0][0]]);
   }
-  handle.addEventListener('mousedown', e=>onDown(e.clientY));
-  window.addEventListener('mousemove', e=>onMove(e.clientY));
-  window.addEventListener('mouseup', onUp);
-  handle.addEventListener('touchstart', e=>onDown(e.touches[0].clientY), {passive:true});
-  window.addEventListener('touchmove', e=>{ if(dragging){ onMove(e.touches[0].clientY); } }, {passive:true});
-  window.addEventListener('touchend', onUp);
+  handle.addEventListener('mousedown', e=>onDown(e.clientY)); window.addEventListener('mousemove', e=>onMove(e.clientY)); window.addEventListener('mouseup', onUp);
+  handle.addEventListener('touchstart', e=>onDown(e.touches[0].clientY), {passive:true}); window.addEventListener('touchmove', e=>{ if(dragging) onMove(e.touches[0].clientY); }, {passive:true}); window.addEventListener('touchend', onUp);
 
-  // ---------- FILTER MODAL ----------
+  // FILTER MODAL
   const filterOverlay = document.getElementById('filterOverlay');
   document.getElementById('filterBtn').addEventListener('click', ()=> filterOverlay.classList.add('show'));
   document.getElementById('filterCloseX').addEventListener('click', ()=> filterOverlay.classList.remove('show'));
   filterOverlay.addEventListener('click', e=>{ if(e.target===filterOverlay) filterOverlay.classList.remove('show'); });
 
-  document.getElementById('radiusChips').addEventListener('click', e=>{
-    const chip = e.target.closest('.chip-opt'); if(!chip) return;
-    [...chip.parentElement.children].forEach(c=>c.classList.remove('on'));
-    chip.classList.add('on');
+  document.querySelectorAll('.chips').forEach(container => {
+    if(container.id === 'featureChips' || container.id === 'excludeChips'){
+      container.addEventListener('click', e=>{ const chip = e.target.closest('.chip-opt'); if(chip) chip.classList.toggle('on'); });
+    } else {
+      container.addEventListener('click', e=>{
+        const chip = e.target.closest('.chip-opt'); if(!chip) return;
+        [...chip.parentElement.children].forEach(c=>c.classList.remove('on')); chip.classList.add('on');
+      });
+    }
   });
-  document.getElementById('foundedChips').addEventListener('click', e=>{
-    const chip = e.target.closest('.chip-opt'); if(!chip) return;
-    [...chip.parentElement.children].forEach(c=>c.classList.remove('on'));
-    chip.classList.add('on');
-  });
-  function multiToggle(containerId){
-    document.getElementById(containerId).addEventListener('click', e=>{
-      const chip = e.target.closest('.chip-opt'); if(!chip) return;
-      chip.classList.toggle('on');
-    });
-  }
-  multiToggle('featureChips');
 
-  // ---------- GAS URL 顯示切換 ----------
+  // GAS URL & SALES NAME UI
   function updateGasUI() {
     const url = localStorage.getItem('gasUrl');
     if (url && url.trim() !== '') {
-      document.getElementById('gasSavedMode').style.display = 'flex';
-      document.getElementById('gasConfigMode').style.display = 'none';
-      document.getElementById('gasUrlInput').value = url;
+      document.getElementById('gasSavedMode').style.display = 'flex'; document.getElementById('gasConfigMode').style.display = 'none'; document.getElementById('gasUrlInput').value = url;
     } else {
-      document.getElementById('gasSavedMode').style.display = 'none';
-      document.getElementById('gasConfigMode').style.display = 'flex';
-      document.getElementById('gasUrlInput').value = '';
+      document.getElementById('gasSavedMode').style.display = 'none'; document.getElementById('gasConfigMode').style.display = 'flex'; document.getElementById('gasUrlInput').value = '';
     }
+    const sName = localStorage.getItem('salesName');
+    if (sName) document.getElementById('salesNameInput').value = sName;
   }
-
-  document.getElementById('editGasBtn').addEventListener('click', () => {
-    document.getElementById('gasSavedMode').style.display = 'none';
-    document.getElementById('gasConfigMode').style.display = 'flex';
-  });
-
-  document.getElementById('saveGasBtn').addEventListener('click', () => {
-    const val = document.getElementById('gasUrlInput').value.trim();
-    localStorage.setItem('gasUrl', val);
-    updateGasUI();
-    showToast('☁️ 雲端同步網址已儲存');
-  });
-
+  document.getElementById('editGasBtn').addEventListener('click', () => { document.getElementById('gasSavedMode').style.display = 'none'; document.getElementById('gasConfigMode').style.display = 'flex'; });
+  document.getElementById('saveGasBtn').addEventListener('click', () => { localStorage.setItem('gasUrl', document.getElementById('gasUrlInput').value.trim()); updateGasUI(); showToast('☁️ 雲端同步網址已儲存'); });
+  document.getElementById('salesNameInput').addEventListener('change', e => { localStorage.setItem('salesName', e.target.value.trim()); });
 
   document.getElementById('applyFilter').addEventListener('click', ()=>{
     filters.radius = Number(document.querySelector('#radiusChips .on').dataset.v);
-    filters.founded = document.querySelector('#foundedChips .on').dataset.v;
     filters.features = [...document.querySelectorAll('#featureChips .chip-opt.on')].map(c=>c.dataset.v);
     
-    const active = filters.founded!=='all' || filters.features.length || filters.radius!==1000;
+    // 取得排除條件設定
+    const exclude = [...document.querySelectorAll('#excludeChips .chip-opt.on')].map(c=>c.dataset.v);
+    filters.excludeConv = exclude.includes('excludeConv');
+    filters.excludeChains = exclude.includes('excludeChains');
+    
+    const active = filters.features.length > 0 || exclude.length > 0 || filters.radius!==1000;
     document.getElementById('filterDot').classList.toggle('show', active);
     
+    localStorage.setItem('gasUrl', document.getElementById('gasUrlInput').value.trim());
+    localStorage.setItem('salesName', document.getElementById('salesNameInput').value.trim());
+    updateGasUI();
+
     filterOverlay.classList.remove('show');
     render();
     showToast('已套用設定');
   });
 
-  // ---------- RECORD MODAL ----------
+  // RECORD MODAL
   const recordOverlay = document.getElementById('recordOverlay');
   let draftStatus='new', draftPhotos=[];
 
-  async function openRecord(id){
+  function openRecord(id){
     activeStoreId = id;
     const s = stores.find(x=>x.id===id);
     document.getElementById('recordTitle').textContent = s.name;
-    
-    // 動態載入商家詳細資訊
-    const tagsHtml = tagsFor(s).join('');
-    document.getElementById('recordStoreInfo').innerHTML = `
-      <div style="margin-bottom: 4px;">📍 ${s.addr || '地址未提供'}</div>
-      <div style="margin-bottom: 8px;">🏷️ ${s.cat}</div>
-      <div class="tags">${tagsHtml}</div>
-    `;
-
-    draftStatus = s.status;
-    draftPhotos = [...s.photos];
+    document.getElementById('recordStoreInfo').innerHTML = `<div style="margin-bottom: 4px;">📍 ${s.addr || '地址未提供'}</div><div style="margin-bottom: 8px;">🏷️ ${s.cat}</div><div class="tags">${tagsFor(s).join('')}</div>`;
+    draftStatus = s.status; draftPhotos = [...s.photos];
     document.getElementById('noteInput').value = s.note || '';
-    renderStatusSelect();
-    renderPhotoRow();
+    renderStatusSelect(); renderPhotoRow();
     recordOverlay.classList.add('show');
-
-    // try to hydrate from persistent storage
-    try{
-      const raw = localStorage.getItem('visit:'+id);
-      if(raw){
-        const saved = JSON.parse(raw);
-        draftStatus = saved.status || draftStatus;
-        draftPhotos = saved.photos || draftPhotos;
-        document.getElementById('noteInput').value = saved.note || '';
-        renderStatusSelect(); renderPhotoRow();
-      }
-    }catch(err){ /* no prior record, ignore */ }
   }
 
-  function renderStatusSelect(){
-    document.querySelectorAll('.status-opt').forEach(el=>{
-      el.classList.toggle('on', el.dataset.s === draftStatus);
-    });
-  }
-  document.getElementById('statusSelect').addEventListener('click', e=>{
-    const opt = e.target.closest('.status-opt'); if(!opt) return;
-    draftStatus = opt.dataset.s;
-    renderStatusSelect();
-  });
+  function renderStatusSelect(){ document.querySelectorAll('.status-opt').forEach(el=>el.classList.toggle('on', el.dataset.s === draftStatus)); }
+  document.getElementById('statusSelect').addEventListener('click', e=>{ const opt = e.target.closest('.status-opt'); if(opt){ draftStatus = opt.dataset.s; renderStatusSelect(); } });
 
   function renderPhotoRow(){
     const row = document.getElementById('photoRow');
     row.querySelectorAll('.photo-thumb').forEach(el=>el.remove());
-    draftPhotos.forEach((p,idx)=>{
-      const div = document.createElement('div');
-      div.className='photo-thumb';
-      div.innerHTML = `<img src="${p.dataUrl}"><div class="meta">${p.time}<br>${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}</div>`;
-      row.appendChild(div);
+    draftPhotos.forEach((p)=>{
+      const div = document.createElement('div'); div.className='photo-thumb'; div.innerHTML = `<img src="${p.dataUrl}"><div class="meta">${p.time}<br>${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}</div>`; row.appendChild(div);
     });
   }
 
   document.getElementById('photoAdd').addEventListener('click', ()=> document.getElementById('photoInput').click());
   document.getElementById('photoInput').addEventListener('change', e=>{
-    const file = e.target.files[0];
-    if(!file) return;
-    const s = stores.find(x=>x.id===activeStoreId);
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      draftPhotos.push({
-        dataUrl: reader.result,
-        time: new Date().toLocaleString('zh-TW', {hour12:false}),
-        lat: s.lat, lng: s.lng
-      });
-      renderPhotoRow();
-    };
-    reader.readAsDataURL(file);
-    e.target.value='';
+    const file = e.target.files[0]; if(!file) return;
+    const s = stores.find(x=>x.id===activeStoreId); const reader = new FileReader();
+    reader.onload = ()=>{ draftPhotos.push({ dataUrl: reader.result, time: new Date().toLocaleTimeString('zh-TW', {hour12:false}), lat: s.lat, lng: s.lng }); renderPhotoRow(); };
+    reader.readAsDataURL(file); e.target.value='';
   });
 
   document.getElementById('recordCloseX').addEventListener('click', ()=> recordOverlay.classList.remove('show'));
@@ -920,57 +801,29 @@
 
   document.getElementById('saveRecord').addEventListener('click', async ()=>{
     const s = stores.find(x=>x.id===activeStoreId);
-    s.status = draftStatus;
-    s.note = document.getElementById('noteInput').value;
-    s.photos = draftPhotos;
-    s.lastUpdated = new Date().getTime(); // 紀錄存檔當下的 Timestamp
-
-    try{
-      localStorage.setItem('visit:'+s.id, JSON.stringify({
-        status:s.status, note:s.note, photos:s.photos, lastUpdated: s.lastUpdated
-      }));
-    }catch(err){ /* storage unavailable */ }
-
-    recordOverlay.classList.remove('show');
-    render();
-    showToast(`已更新「${s.name}」為 ${STATUS_LABEL[s.status]}`);
+    s.status = draftStatus; s.note = document.getElementById('noteInput').value; s.photos = draftPhotos; s.lastUpdated = new Date().getTime(); 
+    try{ localStorage.setItem('visit:'+s.id, JSON.stringify({ status:s.status, note:s.note, photos:s.photos, lastUpdated: s.lastUpdated })); }catch(err){}
+    recordOverlay.classList.remove('show'); render(); showToast(`已更新「${s.name}」為 ${STATUS_LABEL[s.status]}`);
   });
 
-  // ---------- MAP DRAG EVENT ----------
-  map.on('moveend', () => {
-    if(hasRealData) {
-      render(); // 重新計算距離中心點並排序
-    }
-  });
+  map.on('moveend', () => { if(hasRealData) render(); });
 
-  // ---------- LOAD PERSISTED STATE ----------
   async function hydrateAll(){
     try{
+      const savedCustom = localStorage.getItem('customStores');
+      if (savedCustom) { customStores = JSON.parse(savedCustom); stores = stores.concat(customStores); }
       for(let i=0;i<localStorage.length;i++){
-        const key = localStorage.key(i);
-        if(!key || !key.startsWith('visit:')) continue;
-        const id = key.replace('visit:','');
-        const s = stores.find(x=>x.id===id);
-        if(!s) continue;
+        const key = localStorage.key(i); if(!key || !key.startsWith('visit:')) continue;
+        const id = key.replace('visit:',''); const s = stores.find(x=>x.id===id); if(!s) continue;
         const raw = localStorage.getItem(key);
-        if(raw){
-          const saved = JSON.parse(raw);
-          s.status = saved.status || s.status;
-          s.note = saved.note || '';
-          s.photos = saved.photos || [];
-          s.lastUpdated = saved.lastUpdated || null;
-        }
+        if(raw){ const saved = JSON.parse(raw); s.status = saved.status; s.note = saved.note; s.photos = saved.photos; s.lastUpdated = saved.lastUpdated; }
       }
-      
-      // 更新 GAS UI 狀態
       updateGasUI();
-
-    }catch(err){ /* first run */ }
+    }catch(err){}
     render();
   }
 
-  render();
-  hydrateAll();
+  render(); hydrateAll();
 })();
 </script>
 </body>
