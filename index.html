@@ -303,7 +303,7 @@
             <div class="chip-opt on" data-v="all">全選</div>
           </div>
         </div>
-        <!-- 修正為「正向」的篩選條件 -->
+        <!-- 正向篩選條件 -->
         <div class="f-group">
           <div class="f-label">數位資產條件 <span class="n">多選</span></div>
           <div class="chips" id="featureChips">
@@ -317,8 +317,20 @@
         <!-- 雲端同步設定 -->
         <div class="f-group" style="border-top:1px dashed var(--line); padding-top:16px; margin-top:20px;">
           <div class="f-label">☁️ 雲端同步設定 (Google Sheets)</div>
-          <input type="text" id="gasUrlInput" placeholder="請貼上 Apps Script 接收碼網址 (選填)" style="width:100%; padding:10px; border-radius:8px; border:1.5px solid var(--line); font-size:12px; font-family:monospace; background:#fff;">
-          <div class="voice-hint" style="margin-top:6px;">💡 設定後，按下右上角「匯出」將直接寫入雲端，否則為下載 Excel 檔。</div>
+          
+          <!-- 未設定或編輯模式 -->
+          <div id="gasConfigMode" style="display:none; gap:6px; margin-bottom:6px;">
+            <input type="text" id="gasUrlInput" placeholder="請貼上 Apps Script 接收碼網址" style="flex:1; padding:10px; border-radius:8px; border:1.5px solid var(--line); font-size:12px; font-family:monospace; background:#fff;">
+            <button id="saveGasBtn" style="background:var(--ink); color:var(--paper); border:none; border-radius:8px; padding:0 12px; font-weight:bold; cursor:pointer; white-space:nowrap;">儲存</button>
+          </div>
+          
+          <!-- 已設定模式 -->
+          <div id="gasSavedMode" style="display:none; align-items:center; justify-content:space-between; background:#e6f4ea; border:1px solid #bbf7d0; padding:10px 12px; border-radius:8px; margin-bottom:6px;">
+            <div style="font-size:12.5px; font-weight:700; color:#166534;">✅ 已綁定雲端表格</div>
+            <button id="editGasBtn" style="background:transparent; border:1px solid #166534; color:#166534; border-radius:6px; padding:4px 10px; font-size:11.5px; font-weight:bold; cursor:pointer;">變更</button>
+          </div>
+
+          <div class="voice-hint">💡 設定後，按下右上角「匯出」將直接寫入雲端，否則為下載 Excel 檔。</div>
         </div>
 
       </div>
@@ -786,10 +798,32 @@
   }
   multiToggle('featureChips');
 
-  // 儲存 GAS URL 與篩選設定
-  document.getElementById('gasUrlInput').addEventListener('change', e => {
-    localStorage.setItem('gasUrl', e.target.value.trim());
+  // ---------- GAS URL 顯示切換 ----------
+  function updateGasUI() {
+    const url = localStorage.getItem('gasUrl');
+    if (url && url.trim() !== '') {
+      document.getElementById('gasSavedMode').style.display = 'flex';
+      document.getElementById('gasConfigMode').style.display = 'none';
+      document.getElementById('gasUrlInput').value = url;
+    } else {
+      document.getElementById('gasSavedMode').style.display = 'none';
+      document.getElementById('gasConfigMode').style.display = 'flex';
+      document.getElementById('gasUrlInput').value = '';
+    }
+  }
+
+  document.getElementById('editGasBtn').addEventListener('click', () => {
+    document.getElementById('gasSavedMode').style.display = 'none';
+    document.getElementById('gasConfigMode').style.display = 'flex';
   });
+
+  document.getElementById('saveGasBtn').addEventListener('click', () => {
+    const val = document.getElementById('gasUrlInput').value.trim();
+    localStorage.setItem('gasUrl', val);
+    updateGasUI();
+    showToast('☁️ 雲端同步網址已儲存');
+  });
+
 
   document.getElementById('applyFilter').addEventListener('click', ()=>{
     filters.radius = Number(document.querySelector('#radiusChips .on').dataset.v);
@@ -799,9 +833,6 @@
     const active = filters.founded!=='all' || filters.features.length || filters.radius!==1000;
     document.getElementById('filterDot').classList.toggle('show', active);
     
-    // 手動觸發一下 gasUrlInput 的變更以防萬一
-    localStorage.setItem('gasUrl', document.getElementById('gasUrlInput').value.trim());
-
     filterOverlay.classList.remove('show');
     render();
     showToast('已套用設定');
@@ -931,11 +962,9 @@
         }
       }
       
-      // 載入儲存的 GAS URL
-      const savedGasUrl = localStorage.getItem('gasUrl');
-      if (savedGasUrl) {
-        document.getElementById('gasUrlInput').value = savedGasUrl;
-      }
+      // 更新 GAS UI 狀態
+      updateGasUI();
+
     }catch(err){ /* first run */ }
     render();
   }
