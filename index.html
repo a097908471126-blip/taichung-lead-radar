@@ -634,8 +634,7 @@
     }
 
     // 準備 CSV 內容
-    let csv = '店名,分類,地址,狀態,備註,最後更新時間
-';
+    let csv = '店名,分類,地址,狀態,備註,最後更新時間\n';
     todayRecords.forEach(s => {
       const timeStr = new Date(s.lastUpdated).toLocaleTimeString('zh-TW', {hour12:false});
       const escapeCSV = str => `"${String(str || '').replace(/"/g, '""')}"`; // 處理換行或逗號
@@ -647,12 +646,11 @@
         escapeCSV(STATUS_LABEL[s.status]),
         escapeCSV(s.note),
         escapeCSV(timeStr)
-      ].join(',') + '
-';
+      ].join(',') + '\n';
     });
 
     // 加入 BOM 以解決 Excel 中文亂碼問題
-    const blob = new Blob(['﻿' + csv], {type: 'text/csv;charset=utf-8;'});
+    const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8;'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
