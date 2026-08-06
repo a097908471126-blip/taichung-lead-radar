@@ -282,10 +282,9 @@
         <div class="f-group">
           <div class="f-label">排除特定店家 <span class="n">必備過濾</span></div>
           <div class="chips" id="excludeChips">
-            <div class="chip-opt" data-v="excludeConv">排除便利商店</div>
-            <div class="chip-opt" data-v="excludeChains">排除常見連鎖品牌</div>
+            <div class="chip-opt" data-v="excludeChains">排除常見連鎖品牌 (麥當勞/星巴克/全聯...)</div>
           </div>
-          <div class="voice-hint">過濾掉 7-11、全家、星巴克、連鎖藥妝與量販等</div>
+          <div class="voice-hint">系統已強制永久過濾「便利商店」，若勾選此項將額外過濾數十種常見大品牌。</div>
         </div>
 
         <div class="f-group">
@@ -319,6 +318,7 @@
           </div>
           <div class="voice-hint">💡 設定後，按下右上角「匯出」將直接寫入雲端，否則為下載 Excel 檔。</div>
         </div>
+
       </div>
       <div class="modal-foot"><button class="primary-btn" id="applyFilter">套用設定</button></div>
     </div>
@@ -329,14 +329,14 @@
     <div class="modal">
       <div class="modal-head"><span class="modal-title">新增自訂店家</span><button class="modal-close" id="addStoreCloseX">✕</button></div>
       <div class="modal-body">
-        <div class="voice-hint" style="margin-bottom:16px; color:var(--signal); font-weight:bold;">📍 將以目前地圖「正中心」為店家座標建立</div>
+        <div class="voice-hint" style="margin-bottom:16px; color:var(--signal); font-weight:bold;">📍 將以您的「目前所在位置」為座標建立</div>
         <div class="f-group">
           <div class="f-label">店家名稱 <span style="color:var(--red);">*</span></div>
           <input type="text" id="newStoreName" class="txt" placeholder="請輸入完整店名">
         </div>
         <div class="f-group">
           <div class="f-label">行業分類</div>
-          <input type="text" id="newStoreCat" class="txt" placeholder="例如：餐飲、零售、醫美...">
+          <input type="text" id="newStoreCat" class="txt" placeholder="例如：餐飲、零售、醫美、公司企業...">
         </div>
         <div class="f-group">
           <div class="f-label">地址 (選填)</div>
@@ -386,17 +386,23 @@
   const CENTER = {lat:24.1508, lng:120.6650}; 
 
   // 常見連鎖品牌過濾關鍵字
-  const CHAIN_KEYWORDS = ['7-11','7-eleven','全家','萊爾富','ok超商','麥當勞','肯德基','摩斯','星巴克','路易莎','50嵐','清心','屈臣氏','康是美','寶雅','全聯','家樂福','八方雲集','大苑子','茶湯會','可不可','迷客夏','cama','拿坡里','達美樂','必勝客'];
+  const CHAIN_KEYWORDS = ['7-11','7-eleven','全家','萊爾富','ok超商','麥當勞','肯德基','摩斯','星巴克','路易莎','50嵐','清心','屈臣氏','康是美','寶雅','全聯','家樂福','八方雲集','大苑子','茶湯會','可不可','迷客夏','cama','拿坡里','達美樂','必勝客','王品','壽司郎'];
 
+  // 重建較豐富的示範資料 (包含公司行號)
   const RAW_STORES = [
     {id:'s1', name:'金旺五金行', cat:'五金百貨', addr:'台中市西區大隆路12號', lat:24.1487, lng:120.6612, founded:'old', hasWebsite:false, hasFB:false, hasIG:false, hasLine:false},
     {id:'s2', name:'順心早午餐', cat:'餐飲', addr:'台中市西區存中街45號', lat:24.1523, lng:120.6631, founded:'new', hasWebsite:false, hasFB:true, hasIG:true, hasLine:false},
-    {id:'s3', name:'全家便利商店(測試)', cat:'便利商店', addr:'台中市西區測試路1號', lat:24.1511, lng:120.6640, founded:'old', hasWebsite:true, hasFB:false, hasIG:false, hasLine:false},
+    {id:'s3', name:'安可牙醫診所', cat:'醫療診所', addr:'台中市西區美村路一段88號', lat:24.1461, lng:120.6685, founded:'old', hasWebsite:false, hasFB:false, hasIG:false, hasLine:false},
+    {id:'s4', name:'巷口洗衣坊', cat:'生活服務', addr:'台中市西區永順街20號', lat:24.1549, lng:120.6668, founded:'old', hasWebsite:false, hasFB:true, hasIG:false, hasLine:false},
+    {id:'s5', name:'創紀數位整合行銷', cat:'公司企業', addr:'台中市西區台灣大道二段285號', lat:24.1530, lng:120.6620, founded:'old', hasWebsite:true, hasFB:true, hasIG:false, hasLine:true},
+    {id:'s6', name:'綠光有機超市', cat:'零售', addr:'台中市南屯區大墩南路102號', lat:24.1408, lng:120.6355, founded:'new', hasWebsite:true, hasFB:true, hasIG:true, hasLine:true},
+    {id:'s7', name:'鐵人健身工作室', cat:'運動健身', addr:'台中市西屯區台灣大道三段268號', lat:24.1685, lng:120.6455, founded:'old', hasWebsite:true, hasFB:true, hasIG:true, hasLine:true},
+    {id:'s8', name:'晨光美髮沙龍', cat:'美業', addr:'台中市西屯區西平南巷18號', lat:24.1721, lng:120.6398, founded:'new', hasWebsite:false, hasFB:true, hasIG:true, hasLine:false}
   ];
 
   let stores = RAW_STORES.map(s => Object.assign({status:'new', note:'', photos:[], source:'demo', lastUpdated: null}, s));
   let customStores = []; 
-  let filters = {radius:1000, features:[], excludeConv: false, excludeChains: false};
+  let filters = {radius:1000, features:[], excludeChains: false};
   let userLoc = {lat:CENTER.lat, lng:CENTER.lng};
   let activeStoreId = null;
   let hasRealData = false;
@@ -444,12 +450,16 @@
   rebuildMarkers();
 
   if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(pos=>{
+    navigator.geolocation.watchPosition(pos=>{
       userLoc = {lat:pos.coords.latitude, lng:pos.coords.longitude};
       userMarker.setLatLng([userLoc.lat, userLoc.lng]);
-      map.setView([userLoc.lat, userLoc.lng], 15);
-      render();
-    }, ()=>{}, {timeout:4000});
+    }, ()=>{}, {enableHighAccuracy: true, maximumAge: 10000});
+    
+    // Initial center
+    navigator.geolocation.getCurrentPosition(pos=>{
+        map.setView([pos.coords.latitude, pos.coords.longitude], 15);
+        render();
+    });
   }
 
   // SEARCH BAR
@@ -467,6 +477,9 @@
 
   // LIST / FILTER RENDER
   function passesFilter(s, center){
+    // 永久強制過濾便利商店
+    if(s.cat === '便利商店') return false;
+
     if(searchQuery) {
       const nameMatch = s.name.toLowerCase().includes(searchQuery);
       const addrMatch = (s.addr || '').toLowerCase().includes(searchQuery);
@@ -476,8 +489,7 @@
     const d = haversine(center, s);
     if(!searchQuery && d > filters.radius) return false;
     
-    // 排除特定店家邏輯
-    if(filters.excludeConv && s.cat === '便利商店') return false;
+    // 排除特定連鎖店家邏輯
     if(filters.excludeChains) {
        const lowerName = s.name.toLowerCase();
        if(CHAIN_KEYWORDS.some(k => lowerName.includes(k))) return false;
@@ -556,7 +568,7 @@
     toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
   }
 
-  // ADD CUSTOM STORE
+  // ADD CUSTOM STORE (改成使用 GPS 定位點)
   document.getElementById('addStoreFab').addEventListener('click', () => {
     document.getElementById('newStoreName').value = '';
     document.getElementById('newStoreCat').value = '';
@@ -571,12 +583,12 @@
     
     const cat = document.getElementById('newStoreCat').value.trim() || '其他';
     const addr = document.getElementById('newStoreAddr').value.trim();
-    const center = map.getCenter();
-    const newId = 'custom-' + Date.now();
     
+    // 使用 userLoc (GPS 當下定位) 而非 map.getCenter()
+    const newId = 'custom-' + Date.now();
     const newStore = {
       id: newId, name: name, cat: cat, addr: addr,
-      lat: center.lat, lng: center.lng,
+      lat: userLoc.lat, lng: userLoc.lng,
       founded: 'unknown', hasWebsite: false, hasFB: false, hasIG: false, hasLine: false,
       source: 'custom', status: 'new', note: '', photos: [], lastUpdated: null
     };
@@ -585,8 +597,11 @@
     stores.push(newStore);
     try { localStorage.setItem('customStores', JSON.stringify(customStores)); } catch(e){}
 
+    // 把地圖視角移到新建的點上
+    map.setView([userLoc.lat, userLoc.lng], 16, {animate: true});
     rebuildMarkers();
     render();
+    
     document.getElementById('addStoreOverlay').classList.remove('show');
     showToast('✅ 成功新增地標！');
     setTimeout(() => openRecord(newId), 300);
@@ -597,9 +612,11 @@
     'shop:convenience':'便利商店', 'shop:supermarket':'超市', 'shop:bakery':'烘焙', 'shop:clothes':'服飾', 'shop:hairdresser':'美髮',
     'shop:electronics':'電子3C', 'shop:optician':'眼鏡', 'shop:pet':'寵物用品', 'shop:florist':'花店', 'shop:car_repair':'汽修',
     'shop:hardware':'五金', 'amenity:restaurant':'餐廳', 'amenity:cafe':'咖啡廳', 'amenity:fast_food':'速食',
-    'amenity:pharmacy':'藥局', 'amenity:clinic':'診所', 'amenity:dentist':'牙醫診所'
+    'amenity:pharmacy':'藥局', 'amenity:clinic':'診所', 'amenity:dentist':'牙醫診所', 'office:company':'公司企業', 'office:estate_agent':'房屋仲介'
   };
   function osmCategory(tags){
+    // 新增 office 類型的判定
+    if(tags.office) return OSM_CATEGORY_MAP['office:'+tags.office] || '公司企業';
     for(const key of ['shop','amenity']){
       if(tags[key]){ const label = OSM_CATEGORY_MAP[key+':'+tags[key]]; return label || '其他'; }
     }
@@ -610,7 +627,8 @@
     return [tags['addr:city'], tags['addr:district'], tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join('');
   }
   function buildOverpassQuery(lat, lng, radiusM){
-    return `[out:json][timeout:25];(node["shop"]["name"](around:${radiusM},${lat},${lng});node["amenity"~"restaurant|cafe|fast_food|bar|pub|pharmacy|bank|clinic|dentist|veterinary|driving_school|fitness_centre|kindergarten"]["name"](around:${radiusM},${lat},${lng}););out body;`;
+    // 加入 node["office"] 讓它能抓到公司企業
+    return `[out:json][timeout:25];(node["shop"]["name"](around:${radiusM},${lat},${lng});node["amenity"~"restaurant|cafe|fast_food|bar|pub|pharmacy|bank|clinic|dentist|veterinary|driving_school|fitness_centre|kindergarten"]["name"](around:${radiusM},${lat},${lng});node["office"]["name"](around:${radiusM},${lat},${lng}););out body;`;
   }
 
   async function fetchRealStores(){
@@ -623,10 +641,7 @@
       if(!res.ok) throw new Error();
       const data = await res.json();
       const elements = (data.elements || []).filter(el => el.tags && el.tags.name);
-      if(!elements.length){
-        showToast('這個範圍內查不到已登記的店家，試試放大搜尋半徑或移動地圖');
-        icon.classList.remove('spin'); return;
-      }
+      
       const fetched = elements.map(el=>{
         const tags = el.tags;
         return {
@@ -638,7 +653,12 @@
           hasLine: !!(tags['contact:line'] || tags.line),
           source:'osm', status:'new', note:'', photos:[], lastUpdated: null
         };
-      });
+      }).filter(s => s.cat !== '便利商店'); // 抓取時直接剔除便利商店
+
+      if(!fetched.length && !customStores.length){
+        showToast('這個範圍內查不到已登記的店家，試試放大搜尋半徑或移動地圖');
+        icon.classList.remove('spin'); return;
+      }
 
       fetched.push(...customStores);
       fetched.forEach(s=>{
@@ -649,7 +669,7 @@
       });
 
       stores = fetched; hasRealData = true; rebuildMarkers(); render();
-      showToast(`已抓到 ${fetched.length - customStores.length} 間附近店家`);
+      showToast(`已抓到 ${fetched.length - customStores.length} 間附近店家與公司`);
     }catch(err){ showToast('查詢失敗，請檢查網路連線後再試一次'); }
     icon.classList.remove('spin');
   }
@@ -673,7 +693,8 @@
 
     if (gasUrl && gasUrl.startsWith('https://script.google.com')) {
       showToast('☁️ 正在同步至 Google 雲端試算表...');
-      // 修正：使用 no-cors 模式避開跨域阻擋，強制推送
+      
+      // 使用 no-cors 強制推送，繞過瀏覽器跨域擋截
       fetch(gasUrl, {
         method: 'POST', mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -745,9 +766,7 @@
     filters.radius = Number(document.querySelector('#radiusChips .on').dataset.v);
     filters.features = [...document.querySelectorAll('#featureChips .chip-opt.on')].map(c=>c.dataset.v);
     
-    // 取得排除條件設定
     const exclude = [...document.querySelectorAll('#excludeChips .chip-opt.on')].map(c=>c.dataset.v);
-    filters.excludeConv = exclude.includes('excludeConv');
     filters.excludeChains = exclude.includes('excludeChains');
     
     const active = filters.features.length > 0 || exclude.length > 0 || filters.radius!==1000;
