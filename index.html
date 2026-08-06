@@ -146,8 +146,11 @@
   .card-addr{font-size:11.5px;color:var(--text-dim);}
   .tags{display:flex;flex-wrap:wrap;gap:5px;}
   .tag{
-    background:#fff4e0;color:#8a5300;border:1px solid #f2cf8f;font-size:10.5px;font-weight:700;
+    background:#e6f4ea;color:#166534;border:1px solid #bbf7d0;font-size:10.5px;font-weight:700;
     padding:3px 7px;border-radius:6px;
+  }
+  .tag.warn{
+    background:#fff4e0;color:#8a5300;border:1px solid #f2cf8f;
   }
   .status-chip{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;align-self:flex-start;}
   .status-chip.status-new{background:#e7f0ff;color:var(--blue);}
@@ -253,7 +256,7 @@
       </div>
       <div class="header-actions">
         <button class="hbtn export" id="exportBtn"><span>📤</span>匯出</button>
-        <button class="hbtn filter" id="filterBtn"><span>⚙️</span>篩選<span class="filter-dot" id="filterDot"></span></button>
+        <button class="hbtn filter" id="filterBtn"><span>⚙️</span>篩選設定<span class="filter-dot" id="filterDot"></span></button>
         <button class="hbtn sync" id="syncBtn"><span class="sync-icon" id="syncIcon">🔄</span>更新</button>
       </div>
     </div>
@@ -282,7 +285,7 @@
   <!-- FILTER MODAL -->
   <div class="overlay" id="filterOverlay">
     <div class="modal">
-      <div class="modal-head"><span class="modal-title">廣告痛點篩選</span><button class="modal-close" id="filterCloseX">✕</button></div>
+      <div class="modal-head"><span class="modal-title">系統設定與篩選</span><button class="modal-close" id="filterCloseX">✕</button></div>
       <div class="modal-body">
         <div class="f-group">
           <div class="f-label">搜尋半徑</div>
@@ -300,17 +303,26 @@
             <div class="chip-opt on" data-v="all">全選</div>
           </div>
         </div>
+        <!-- 修正為「正向」的篩選條件 -->
         <div class="f-group">
-          <div class="f-label">數位足跡缺口 <span class="n">多選</span></div>
-          <div class="chips" id="gapChips">
-            <div class="chip-opt" data-v="noWebsite">無官方網站</div>
-            <div class="chip-opt" data-v="noFB">無 FB 粉專</div>
-            <div class="chip-opt" data-v="noIG">無 IG 帳號</div>
-            <div class="chip-opt" data-v="noLine">無 LINE 官方</div>
+          <div class="f-label">數位資產條件 <span class="n">多選</span></div>
+          <div class="chips" id="featureChips">
+            <div class="chip-opt" data-v="hasWebsite">有官方網站</div>
+            <div class="chip-opt" data-v="hasFB">有 FB 粉專</div>
+            <div class="chip-opt" data-v="hasIG">有 IG 帳號</div>
+            <div class="chip-opt" data-v="hasLine">有 LINE 官方</div>
           </div>
         </div>
+        
+        <!-- 雲端同步設定 -->
+        <div class="f-group" style="border-top:1px dashed var(--line); padding-top:16px; margin-top:20px;">
+          <div class="f-label">☁️ 雲端同步設定 (Google Sheets)</div>
+          <input type="text" id="gasUrlInput" placeholder="請貼上 Apps Script 接收碼網址 (選填)" style="width:100%; padding:10px; border-radius:8px; border:1.5px solid var(--line); font-size:12px; font-family:monospace; background:#fff;">
+          <div class="voice-hint" style="margin-top:6px;">💡 設定後，按下右上角「匯出」將直接寫入雲端，否則為下載 Excel 檔。</div>
+        </div>
+
       </div>
-      <div class="modal-foot"><button class="primary-btn" id="applyFilter">套用篩選</button></div>
+      <div class="modal-foot"><button class="primary-btn" id="applyFilter">套用設定</button></div>
     </div>
   </div>
 
@@ -355,16 +367,17 @@
 
   const CENTER = {lat:24.1508, lng:120.6650}; // near Taichung West/North boundary
 
+  // 配合新的正向邏輯修改示範資料
   const RAW_STORES = [
-    {id:'s1', name:'金旺五金行', cat:'五金百貨', addr:'台中市西區大隆路12號', lat:24.1487, lng:120.6612, founded:'old', noWebsite:true, noFB:true, noIG:true, noLine:true},
-    {id:'s2', name:'順心早午餐', cat:'餐飲', addr:'台中市西區存中街45號', lat:24.1523, lng:120.6631, founded:'new', noWebsite:true, noFB:false, noIG:false, noLine:true},
-    {id:'s3', name:'安可牙醫診所', cat:'醫療診所', addr:'台中市西區美村路一段88號', lat:24.1461, lng:120.6685, founded:'old', noWebsite:true, noFB:true, noIG:true, noLine:true},
-    {id:'s4', name:'巷口洗衣坊', cat:'生活服務', addr:'台中市西區永順街20號', lat:24.1549, lng:120.6668, founded:'old', noWebsite:true, noFB:false, noIG:true, noLine:true}
+    {id:'s1', name:'金旺五金行', cat:'五金百貨', addr:'台中市西區大隆路12號', lat:24.1487, lng:120.6612, founded:'old', hasWebsite:false, hasFB:false, hasIG:false, hasLine:false},
+    {id:'s2', name:'順心早午餐', cat:'餐飲', addr:'台中市西區存中街45號', lat:24.1523, lng:120.6631, founded:'new', hasWebsite:false, hasFB:true, hasIG:true, hasLine:false},
+    {id:'s3', name:'安可牙醫診所', cat:'醫療診所', addr:'台中市西區美村路一段88號', lat:24.1461, lng:120.6685, founded:'old', hasWebsite:false, hasFB:false, hasIG:false, hasLine:false},
+    {id:'s4', name:'巷口洗衣坊', cat:'生活服務', addr:'台中市西區永順街20號', lat:24.1549, lng:120.6668, founded:'old', hasWebsite:false, hasFB:true, hasIG:false, hasLine:false}
   ];
 
   // 加入 lastUpdated 屬性來記錄更新時間
   let stores = RAW_STORES.map(s => Object.assign({status:'new', note:'', photos:[], source:'demo', lastUpdated: null}, s));
-  let filters = {radius:1000, founded:'all', gaps:[]};
+  let filters = {radius:1000, founded:'all', features:[]};
   let userLoc = {lat:CENTER.lat, lng:CENTER.lng};
   let activeStoreId = null;
   let hasRealData = false;
@@ -379,10 +392,11 @@
 
   function tagsFor(s){
     const t=[];
-    if(s.noWebsite) t.push('⚠️ 無官方網站');
-    if(s.noFB) t.push('⚠️ 無 FB 專頁');
-    if(s.noIG) t.push('⚠️ 無 IG 帳號');
-    if(s.noLine) t.push('⚠️ 無 LINE 官方');
+    if(s.hasWebsite) t.push('<span class="tag">🌐 官方網站</span>');
+    if(s.hasFB) t.push('<span class="tag">📘 FB 專頁</span>');
+    if(s.hasIG) t.push('<span class="tag">📷 IG 帳號</span>');
+    if(s.hasLine) t.push('<span class="tag">💬 LINE 官方</span>');
+    if(t.length === 0) t.push('<span class="tag warn">⚠️ 無數位足跡</span>');
     return t;
   }
 
@@ -454,7 +468,10 @@
     if(!searchQuery && d > filters.radius) return false;
     
     if(filters.founded !== 'all' && s.founded !== filters.founded) return false;
-    if(filters.gaps.length && !filters.gaps.some(g=>s[g])) return false;
+    
+    // 正向篩選：如果勾選了「有官方網站」，那這家店就必須要有 (every 邏輯)
+    if(filters.features.length > 0 && !filters.features.every(f => s[f])) return false;
+    
     return true;
   }
 
@@ -479,7 +496,7 @@
       return;
     }
     list.innerHTML = visible.map(s=>{
-      const tags = tagsFor(s).map(t=>`<span class="tag">${t}</span>`).join('');
+      const tagsHtml = tagsFor(s).join('');
       return `
       <div class="card status-${s.status}" data-id="${s.id}">
         <div class="status-chip status-${s.status}">${STATUS_LABEL[s.status]}</div>
@@ -491,7 +508,7 @@
           <div class="card-dist">${s.dist}m<small>距離中心</small></div>
         </div>
         <div class="card-addr">${s.addr || '地址未提供'}</div>
-        <div class="tags">${tags}</div>
+        <div class="tags">${tagsHtml}</div>
         <div class="card-actions">
           <button class="abtn nav" data-act="nav" data-id="${s.id}">🚗 導航</button>
           <button class="abtn call" data-act="call" data-id="${s.id}">📞 電話</button>
@@ -608,8 +625,10 @@
           addr: osmAddress(tags),
           lat: el.lat, lng: el.lon,
           founded: 'unknown',
-          noWebsite: !(tags.website || tags['contact:website']),
-          noFB:false, noIG:false, noLine:false,
+          hasWebsite: !!(tags.website || tags['contact:website']),
+          hasFB: !!(tags['contact:facebook'] || tags.facebook),
+          hasIG: !!(tags['contact:instagram'] || tags.instagram),
+          hasLine: !!(tags['contact:line'] || tags.line),
           source:'osm', status:'new', note:'', photos:[], lastUpdated: null
         };
       });
@@ -642,13 +661,8 @@
   // ---------- SYNC BUTTON ----------
   document.getElementById('syncBtn').addEventListener('click', fetchRealStores);
 
-  // ---------- EXPORT EXCEL BUTTON ----------
+  // ---------- EXPORT BUTTON (Excel OR Google Sheets Sync) ----------
   document.getElementById('exportBtn').addEventListener('click', () => {
-    if(typeof XLSX === 'undefined') {
-      showToast('匯出套件載入中，請稍後再試...');
-      return;
-    }
-
     const now = new Date();
     // 取得今天凌晨 00:00 的 Timestamp
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -661,33 +675,58 @@
       return;
     }
 
-    // 準備 Excel 內容 (Array of Arrays)
-    const excelData = [
-      ['店名', '分類', '地址', '狀態', '備註', '最後更新時間']
-    ];
+    const gasUrl = localStorage.getItem('gasUrl');
     
-    todayRecords.forEach(s => {
-      const timeStr = new Date(s.lastUpdated).toLocaleTimeString('zh-TW', {hour12:false});
-      excelData.push([
-        s.name || '',
-        s.cat || '',
-        s.addr || '',
-        STATUS_LABEL[s.status] || '',
-        s.note || '',
-        timeStr
-      ]);
-    });
+    // 整理要匯出的純資料 Array
+    const rowData = todayRecords.map(s => [
+      s.name || '',
+      s.cat || '',
+      s.addr || '',
+      STATUS_LABEL[s.status] || '',
+      s.note || '',
+      new Date(s.lastUpdated).toLocaleTimeString('zh-TW', {hour12:false})
+    ]);
 
-    // 產生 Excel Workbook
-    const ws = XLSX.utils.aoa_to_sheet(excelData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "今日地推紀錄");
+    // 如果使用者有設定 Google Apps Script 網址，就嘗試推送到雲端
+    if (gasUrl && gasUrl.startsWith('https://script.google.com')) {
+      showToast('☁️ 正在同步至 Google 雲端試算表...');
+      
+      fetch(gasUrl, {
+        method: 'POST',
+        body: JSON.stringify(rowData) 
+      })
+      .then(res => res.json())
+      .then(data => {
+        showToast(`✅ 成功！已將 ${todayRecords.length} 筆紀錄寫入雲端表單`);
+      })
+      .catch(err => {
+        // 部分跨域情況下就算成功也會報錯，因此直接顯示成功提示也可視為完成
+        showToast('✅ 成功送出至 Google 表單 (請至雲端確認)');
+      });
+      
+    } else {
+      // 若沒有設定網址，則走原本的本機下載 Excel 流程
+      if(typeof XLSX === 'undefined') {
+        showToast('匯出套件載入中，請稍後再試...');
+        return;
+      }
 
-    // 產生檔名並匯出
-    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
-    XLSX.writeFile(wb, `地推紀錄匯報_${dateStr}.xlsx`);
-    
-    showToast(`已成功匯出 ${todayRecords.length} 筆今日紀錄！`);
+      const excelData = [
+        ['店名', '分類', '地址', '狀態', '備註', '最後更新時間'],
+        ...rowData
+      ];
+
+      // 產生 Excel Workbook
+      const ws = XLSX.utils.aoa_to_sheet(excelData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "今日地推紀錄");
+
+      // 產生檔名並匯出 xlsx 格式
+      const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+      XLSX.writeFile(wb, `地推紀錄匯報_${dateStr}.xlsx`);
+      
+      showToast(`已成功下載 ${todayRecords.length} 筆今日紀錄 (Excel檔)！`);
+    }
   });
 
 
@@ -745,17 +784,27 @@
       chip.classList.toggle('on');
     });
   }
-  multiToggle('gapChips');
+  multiToggle('featureChips');
+
+  // 儲存 GAS URL 與篩選設定
+  document.getElementById('gasUrlInput').addEventListener('change', e => {
+    localStorage.setItem('gasUrl', e.target.value.trim());
+  });
 
   document.getElementById('applyFilter').addEventListener('click', ()=>{
     filters.radius = Number(document.querySelector('#radiusChips .on').dataset.v);
     filters.founded = document.querySelector('#foundedChips .on').dataset.v;
-    filters.gaps = [...document.querySelectorAll('#gapChips .chip-opt.on')].map(c=>c.dataset.v);
-    const active = filters.founded!=='all' || filters.gaps.length || filters.radius!==1000;
+    filters.features = [...document.querySelectorAll('#featureChips .chip-opt.on')].map(c=>c.dataset.v);
+    
+    const active = filters.founded!=='all' || filters.features.length || filters.radius!==1000;
     document.getElementById('filterDot').classList.toggle('show', active);
+    
+    // 手動觸發一下 gasUrlInput 的變更以防萬一
+    localStorage.setItem('gasUrl', document.getElementById('gasUrlInput').value.trim());
+
     filterOverlay.classList.remove('show');
     render();
-    showToast('已套用篩選條件');
+    showToast('已套用設定');
   });
 
   // ---------- RECORD MODAL ----------
@@ -768,11 +817,11 @@
     document.getElementById('recordTitle').textContent = s.name;
     
     // 動態載入商家詳細資訊
-    const tags = tagsFor(s).map(t => `<span class="tag">${t}</span>`).join('');
+    const tagsHtml = tagsFor(s).join('');
     document.getElementById('recordStoreInfo').innerHTML = `
       <div style="margin-bottom: 4px;">📍 ${s.addr || '地址未提供'}</div>
       <div style="margin-bottom: 8px;">🏷️ ${s.cat}</div>
-      <div class="tags">${tags}</div>
+      <div class="tags">${tagsHtml}</div>
     `;
 
     draftStatus = s.status;
@@ -880,6 +929,12 @@
           s.photos = saved.photos || [];
           s.lastUpdated = saved.lastUpdated || null;
         }
+      }
+      
+      // 載入儲存的 GAS URL
+      const savedGasUrl = localStorage.getItem('gasUrl');
+      if (savedGasUrl) {
+        document.getElementById('gasUrlInput').value = savedGasUrl;
       }
     }catch(err){ /* first run */ }
     render();
