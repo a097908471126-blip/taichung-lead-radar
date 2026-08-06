@@ -343,7 +343,11 @@
 
 </div>
 
+<!-- 引入 Leaflet 地圖 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<!-- 引入 SheetJS 以產生 Excel 檔案 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <script>
 (function(){
   const STATUS_COLOR = {new:'#2f7dfb', negotiating:'#f2a70b', won:'#1bad6b', lost:'#e3403a'};
@@ -638,8 +642,13 @@
   // ---------- SYNC BUTTON ----------
   document.getElementById('syncBtn').addEventListener('click', fetchRealStores);
 
-  // ---------- EXPORT CSV BUTTON ----------
+  // ---------- EXPORT EXCEL BUTTON ----------
   document.getElementById('exportBtn').addEventListener('click', () => {
+    if(typeof XLSX === 'undefined') {
+      showToast('匯出套件載入中，請稍後再試...');
+      return;
+    }
+
     const now = new Date();
     // 取得今天凌晨 00:00 的 Timestamp
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -652,35 +661,31 @@
       return;
     }
 
-    // 準備 CSV 內容
-    let csv = '店名,分類,地址,狀態,備註,最後更新時間\n';
+    // 準備 Excel 內容 (Array of Arrays)
+    const excelData = [
+      ['店名', '分類', '地址', '狀態', '備註', '最後更新時間']
+    ];
+    
     todayRecords.forEach(s => {
       const timeStr = new Date(s.lastUpdated).toLocaleTimeString('zh-TW', {hour12:false});
-      const escapeCSV = str => `"${String(str || '').replace(/"/g, '""')}"`; // 處理換行或逗號
-      
-      csv += [
-        escapeCSV(s.name),
-        escapeCSV(s.cat),
-        escapeCSV(s.addr),
-        escapeCSV(STATUS_LABEL[s.status]),
-        escapeCSV(s.note),
-        escapeCSV(timeStr)
-      ].join(',') + '\n';
+      excelData.push([
+        s.name || '',
+        s.cat || '',
+        s.addr || '',
+        STATUS_LABEL[s.status] || '',
+        s.note || '',
+        timeStr
+      ]);
     });
 
-    // 加入 BOM 以解決 Excel 中文亂碼問題
-    const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8;'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    
+    // 產生 Excel Workbook
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "今日地推紀錄");
+
+    // 產生檔名並匯出
     const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
-    a.download = `地推紀錄匯報_${dateStr}.csv`;
-    
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    XLSX.writeFile(wb, `地推紀錄匯報_${dateStr}.xlsx`);
     
     showToast(`已成功匯出 ${todayRecords.length} 筆今日紀錄！`);
   });
