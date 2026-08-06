@@ -41,28 +41,43 @@
   #header{
     background:var(--ink);color:var(--paper);
     padding:10px 14px 12px;flex:0 0 auto;
-    display:flex;flex-direction:column;gap:8px;z-index:40;
+    display:flex;flex-direction:column;gap:10px;z-index:40;
     border-bottom:3px solid var(--signal);
   }
-  .header-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-  .loc-block{display:flex;flex-direction:column;line-height:1.1;}
+  .header-top{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+  .loc-block{display:flex;flex-direction:column;line-height:1.1;flex:1;}
   .loc-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--signal-dim);text-transform:uppercase;}
-  .loc-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;letter-spacing:.01em;}
+  .loc-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;letter-spacing:.01em;white-space:nowrap;}
   .brand{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:var(--paper-dim);letter-spacing:.08em;opacity:.6;}
-  .header-actions{display:flex;gap:8px;}
+  .header-actions{display:flex;gap:6px;}
   .hbtn{
-    border:none;border-radius:10px;padding:9px 12px;font-size:13px;font-weight:700;
-    display:flex;align-items:center;gap:6px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;
-    transition:transform .12s ease;
+    border:none;border-radius:8px;padding:7px 9px;font-size:12px;font-weight:700;
+    display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;
+    transition:transform .12s ease;white-space:nowrap;
   }
   .hbtn:active{transform:scale(.94);}
   .hbtn.sync{background:var(--signal);color:#1a0d05;}
   .hbtn.filter{background:var(--ink-soft);color:var(--paper);border:1px solid #3a4055;position:relative;}
+  .hbtn.export{background:#3a4055;color:var(--paper);border:1px solid #4a5065;}
   .filter-dot{position:absolute;top:-4px;right:-4px;width:9px;height:9px;border-radius:50%;background:var(--signal);border:2px solid var(--ink);display:none;}
   .filter-dot.show{display:block;}
   .sync-icon{display:inline-block;}
   .sync-icon.spin{animation:spin .9s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* Search Bar */
+  .header-search {
+    display: flex; align-items: center; background: var(--ink-soft); border-radius: 8px;
+    padding: 6px 10px; border: 1px solid #3a4055;
+  }
+  .header-search input {
+    flex: 1; background: transparent; border: none; color: var(--paper); font-size: 13.5px;
+    outline: none; font-family: inherit; width:100%;
+  }
+  .header-search input::placeholder { color: #8890a5; }
+  .header-search button {
+    background: transparent; border: none; color: var(--paper-dim); cursor: pointer; padding: 2px 4px; display:none; font-size:14px;
+  }
 
   /* ---------- MAP ---------- */
   #mapwrap{position:relative;flex:1 1 auto;min-height:0;}
@@ -114,8 +129,9 @@
   .card{
     background:#fff;border-radius:14px;margin-bottom:10px;padding:12px 13px 11px;
     border-left:5px solid var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.06);
-    display:flex;flex-direction:column;gap:8px;
+    display:flex;flex-direction:column;gap:8px; cursor:pointer;
   }
+  .card:active { background:#fafafa; }
   .card.status-negotiating{border-color:var(--yellow);}
   .card.status-won{border-color:var(--green);}
   .card.status-lost{border-color:var(--red);opacity:.72;}
@@ -217,9 +233,14 @@
         <span class="loc-name">📍 <span id="locName">台中市西區</span></span>
       </div>
       <div class="header-actions">
+        <button class="hbtn export" id="exportBtn"><span>📤</span>匯出</button>
         <button class="hbtn filter" id="filterBtn"><span>⚙️</span>篩選<span class="filter-dot" id="filterDot"></span></button>
         <button class="hbtn sync" id="syncBtn"><span class="sync-icon" id="syncIcon">🔄</span>更新</button>
       </div>
+    </div>
+    <div class="header-search">
+      <input type="text" id="searchInput" placeholder="🔍 搜尋目前範圍內的店家名稱或地址...">
+      <button id="clearSearch">✕</button>
     </div>
   </div>
 
@@ -269,13 +290,6 @@
             <div class="chip-opt" data-v="noLine">無 LINE 官方</div>
           </div>
         </div>
-        <div class="f-group">
-          <div class="f-label">社群經營狀態 <span class="n">多選</span></div>
-          <div class="chips" id="socialChips">
-            <div class="chip-opt" data-v="fbStale">FB/IG 停更 > 90天</div>
-            <div class="chip-opt" data-v="lowRating">Google 評分 < 3.8</div>
-          </div>
-        </div>
       </div>
       <div class="modal-foot"><button class="primary-btn" id="applyFilter">套用篩選</button></div>
     </div>
@@ -286,6 +300,9 @@
     <div class="modal">
       <div class="modal-head"><span class="modal-title" id="recordTitle">拜訪紀錄</span><button class="modal-close" id="recordCloseX">✕</button></div>
       <div class="modal-body">
+        <div id="recordStoreInfo" style="margin-bottom: 16px; font-size: 12.5px; color: var(--text-dim); line-height: 1.5;">
+          <!-- 動態插入商家資訊 -->
+        </div>
         <div class="status-select" id="statusSelect">
           <div class="status-opt" data-s="new"><div class="dotc"></div>未拜訪</div>
           <div class="status-opt" data-s="negotiating"><div class="dotc"></div>洽談中</div>
@@ -316,28 +333,19 @@
   const CENTER = {lat:24.1508, lng:120.6650}; // near Taichung West/North boundary
 
   const RAW_STORES = [
-    {id:'s1', name:'金旺五金行', cat:'五金百貨', addr:'台中市西區大隆路12號', lat:24.1487, lng:120.6612, founded:'old', noWebsite:true, noFB:true, noIG:true, noLine:true, fbStale:true, lowRating:false, rating:4.1},
-    {id:'s2', name:'順心早午餐', cat:'餐飲', addr:'台中市西區存中街45號', lat:24.1523, lng:120.6631, founded:'new', noWebsite:true, noFB:false, noIG:false, noLine:true, fbStale:false, lowRating:false, rating:4.5},
-    {id:'s3', name:'安可牙醫診所', cat:'醫療診所', addr:'台中市西區美村路一段88號', lat:24.1461, lng:120.6685, founded:'old', noWebsite:true, noFB:true, noIG:true, noLine:true, fbStale:true, lowRating:false, rating:4.3},
-    {id:'s4', name:'巷口洗衣坊', cat:'生活服務', addr:'台中市西區永順街20號', lat:24.1549, lng:120.6668, founded:'old', noWebsite:true, noFB:false, noIG:true, noLine:true, fbStale:true, lowRating:true, rating:3.5},
-    {id:'s5', name:'橘子寵物美容', cat:'寵物服務', addr:'台中市西屯區文心路三段99號', lat:24.1633, lng:120.6511, founded:'new', noWebsite:true, noFB:false, noIG:false, noLine:false, fbStale:false, lowRating:false, rating:4.7},
-    {id:'s6', name:'鐵人健身工作室', cat:'運動健身', addr:'台中市西屯區台灣大道三段268號', lat:24.1685, lng:120.6455, founded:'old', noWebsite:false, noFB:false, noIG:true, noLine:true, fbStale:false, lowRating:true, rating:3.6},
-    {id:'s7', name:'福林早餐店', cat:'餐飲', addr:'台中市西屯區逢甲路15巷3號', lat:24.1817, lng:120.6459, founded:'old', noWebsite:true, noFB:true, noIG:true, noLine:true, fbStale:true, lowRating:true, rating:3.4},
-    {id:'s8', name:'晨光美髮沙龍', cat:'美業', addr:'台中市西屯區西平南巷18號', lat:24.1721, lng:120.6398, founded:'new', noWebsite:true, noFB:false, noIG:false, noLine:true, fbStale:false, lowRating:false, rating:4.6},
-    {id:'s9', name:'老楊牛肉麵', cat:'餐飲', addr:'台中市南屯區文心路一段56號', lat:24.1372, lng:120.6398, founded:'old', noWebsite:true, noFB:true, noIG:true, noLine:true, fbStale:true, lowRating:false, rating:4.2},
-    {id:'s10', name:'南屯機車行', cat:'汽機車服務', addr:'台中市南屯區永春東路188號', lat:24.1329, lng:120.6421, founded:'old', noWebsite:true, noFB:true, noIG:true, noLine:true, fbStale:true, lowRating:true, rating:3.7},
-    {id:'s11', name:'綠光有機超市', cat:'零售', addr:'台中市南屯區大墩南路102號', lat:24.1408, lng:120.6355, founded:'new', noWebsite:false, noFB:false, noIG:false, noLine:false, fbStale:false, lowRating:false, rating:4.4},
-    {id:'s12', name:'小樹苗托嬰中心', cat:'教育托育', addr:'台中市南屯區文心南五路33號', lat:24.1355, lng:120.6462, founded:'new', noWebsite:true, noFB:false, noIG:true, noLine:true, fbStale:false, lowRating:false, rating:4.8},
-    {id:'s13', name:'北區小燈泡文具', cat:'零售', addr:'台中市北區三民路三段120號', lat:24.1560, lng:120.6839, founded:'old', noWebsite:true, noFB:true, noIG:true, noLine:true, fbStale:true, lowRating:false, rating:4.0},
-    {id:'s14', name:'一心眼鏡行', cat:'零售', addr:'台中市北區育德路77號', lat:24.1592, lng:120.6791, founded:'old', noWebsite:true, noFB:false, noIG:true, noLine:true, fbStale:true, lowRating:true, rating:3.6},
-    {id:'s15', name:'豐盛小吃部', cat:'餐飲', addr:'台中市北區進化北路56號', lat:24.1613, lng:120.6862, founded:'new', noWebsite:true, noFB:true, noIG:true, noLine:true, fbStale:true, lowRating:false, rating:4.1},
+    {id:'s1', name:'金旺五金行', cat:'五金百貨', addr:'台中市西區大隆路12號', lat:24.1487, lng:120.6612, founded:'old', noWebsite:true, noFB:true, noIG:true, noLine:true},
+    {id:'s2', name:'順心早午餐', cat:'餐飲', addr:'台中市西區存中街45號', lat:24.1523, lng:120.6631, founded:'new', noWebsite:true, noFB:false, noIG:false, noLine:true},
+    {id:'s3', name:'安可牙醫診所', cat:'醫療診所', addr:'台中市西區美村路一段88號', lat:24.1461, lng:120.6685, founded:'old', noWebsite:true, noFB:true, noIG:true, noLine:true},
+    {id:'s4', name:'巷口洗衣坊', cat:'生活服務', addr:'台中市西區永順街20號', lat:24.1549, lng:120.6668, founded:'old', noWebsite:true, noFB:false, noIG:true, noLine:true}
   ];
 
-  let stores = RAW_STORES.map(s => Object.assign({status:'new', note:'', photos:[], source:'demo'}, s));
-  let filters = {radius:1000, founded:'all', gaps:[], social:[]};
+  // 加入 lastUpdated 屬性來記錄更新時間
+  let stores = RAW_STORES.map(s => Object.assign({status:'new', note:'', photos:[], source:'demo', lastUpdated: null}, s));
+  let filters = {radius:1000, founded:'all', gaps:[]};
   let userLoc = {lat:CENTER.lat, lng:CENTER.lng};
   let activeStoreId = null;
   let hasRealData = false;
+  let searchQuery = '';
 
   function haversine(a,b){
     const R=6371000, toRad=d=>d*Math.PI/180;
@@ -349,8 +357,8 @@
   function tagsFor(s){
     const t=[];
     if(s.noWebsite) t.push('⚠️ 無官方網站');
-    if(s.fbStale) t.push('⚠️ FB 停更 > 90天');
-    if(s.lowRating) t.push('⚠️ 評分偏低 < 3.8');
+    if(s.noFB) t.push('⚠️ 無 FB 專頁');
+    if(s.noIG) t.push('⚠️ 無 IG 帳號');
     if(s.noLine) t.push('⚠️ 無 LINE 官方');
     return t;
   }
@@ -396,32 +404,55 @@
     }, ()=>{ /* fallback stays at CENTER */ }, {timeout:4000});
   }
 
+  // ---------- SEARCH BAR ----------
+  document.getElementById('searchInput').addEventListener('input', e => {
+    searchQuery = e.target.value.trim().toLowerCase();
+    document.getElementById('clearSearch').style.display = searchQuery ? 'block' : 'none';
+    render();
+  });
+  document.getElementById('clearSearch').addEventListener('click', () => {
+    document.getElementById('searchInput').value = '';
+    searchQuery = '';
+    document.getElementById('clearSearch').style.display = 'none';
+    render();
+  });
+
   // ---------- LIST / FILTER RENDER ----------
-  function passesFilter(s){
-    const d = haversine(userLoc, s);
-    if(d > filters.radius) return false;
+  function passesFilter(s, center){
+    // 關鍵字搜尋 (名稱或地址)
+    if(searchQuery) {
+      const nameMatch = s.name.toLowerCase().includes(searchQuery);
+      const addrMatch = (s.addr || '').toLowerCase().includes(searchQuery);
+      if(!nameMatch && !addrMatch) return false;
+    }
+    
+    // 如果有搜尋字詞，就忽略距離限制，讓使用者能找到已經抓進來的店
+    const d = haversine(center, s);
+    if(!searchQuery && d > filters.radius) return false;
+    
     if(filters.founded !== 'all' && s.founded !== filters.founded) return false;
     if(filters.gaps.length && !filters.gaps.some(g=>s[g])) return false;
-    if(filters.social.length && !filters.social.some(g=>s[g])) return false;
     return true;
   }
 
   function render(){
-    const visible = stores.filter(passesFilter).map(s=>({...s, dist:haversine(userLoc,s)})).sort((a,b)=>a.dist-b.dist);
+    const center = map.getCenter();
+    const visible = stores.filter(s => passesFilter(s, center)).map(s=>({...s, dist:haversine(center,s)})).sort((a,b)=>a.dist-b.dist);
     document.getElementById('countNum').textContent = visible.length;
     document.getElementById('sourceTag').textContent = hasRealData ? '· OpenStreetMap 真實資料' : '· 示範資料（尚未更新）';
     document.getElementById('sourceTag').className = hasRealData ? 'src-real' : 'src-demo';
 
     Object.entries(markers).forEach(([id,m])=>{
       const s = stores.find(x=>x.id===id);
-      const show = passesFilter(s);
-      m.setOpacity(show ? 1 : 0.18);
+      const show = passesFilter(s, center);
+      m.setOpacity(show ? 1 : 0.18); // 隱藏未符合篩選的圖釘
+      if(show) m.setZIndexOffset(1000); else m.setZIndexOffset(0); // 讓符合的顯示在最上層
       m.setIcon(makeIcon(s.status));
     });
 
     const list = document.getElementById('list');
     if(!visible.length){
-      list.innerHTML = `<div class="empty-state">此範圍內沒有符合條件的店家<br>試試放寬篩選半徑、痛點條件，或按「更新」重新抓取</div>`;
+      list.innerHTML = `<div class="empty-state">此範圍內沒有符合條件的店家<br>試試放寬篩選半徑、搜尋字詞，或按「更新」重新抓取</div>`;
       return;
     }
     list.innerHTML = visible.map(s=>{
@@ -434,7 +465,7 @@
             <div class="card-name">${s.name}</div>
             <div class="card-meta">${s.cat}</div>
           </div>
-          <div class="card-dist">${s.dist}m<small>距離</small></div>
+          <div class="card-dist">${s.dist}m<small>距離中心</small></div>
         </div>
         <div class="card-addr">${s.addr || '地址未提供'}</div>
         <div class="tags">${tags}</div>
@@ -447,17 +478,31 @@
     }).join('');
   }
 
+  // 點擊卡片將地圖平移至該店家 (或點擊按鈕執行對應動作)
   document.getElementById('list').addEventListener('click', e=>{
     const btn = e.target.closest('.abtn');
-    if(!btn) return;
-    const id = btn.dataset.id;
-    const s = stores.find(x=>x.id===id);
-    if(btn.dataset.act === 'nav'){
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`, '_blank');
-    } else if(btn.dataset.act === 'call'){
-      showToast('示範資料無實際電話號碼', '📞');
-    } else if(btn.dataset.act === 'record'){
-      openRecord(id);
+    const card = e.target.closest('.card');
+    
+    if(btn){
+      const id = btn.dataset.id;
+      const s = stores.find(x=>x.id===id);
+      if(btn.dataset.act === 'nav'){
+        window.open(`https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`, '_blank');
+      } else if(btn.dataset.act === 'call'){
+        showToast('示範資料無實際電話號碼', '📞');
+      } else if(btn.dataset.act === 'record'){
+        openRecord(id);
+      }
+      return;
+    }
+    
+    // 如果是點擊卡片本身 (非按鈕)，就將地圖移動到該店
+    if(card) {
+      const id = card.dataset.id;
+      const s = stores.find(x=>x.id===id);
+      map.setView([s.lat, s.lng], 16, {animate: true});
+      // 在小螢幕上自動把 Bottom Sheet 縮下去一半，方便看地圖
+      setSheetVh(40); 
     }
   });
 
@@ -512,9 +557,12 @@
   async function fetchRealStores(){
     const icon = document.getElementById('syncIcon');
     icon.classList.add('spin');
-    showToast('正在向 OpenStreetMap 查詢附近店家…');
+    showToast('正在向 OpenStreetMap 查詢畫面中心附近店家…');
+    
+    const currentCenter = map.getCenter();
+    
     try{
-      const query = buildOverpassQuery(userLoc.lat, userLoc.lng, filters.radius);
+      const query = buildOverpassQuery(currentCenter.lat, currentCenter.lng, filters.radius);
       const res = await fetch('https://overpass-api.de/api/interpreter', {
         method:'POST', body:'data='+encodeURIComponent(query)
       });
@@ -523,7 +571,7 @@
       const elements = (data.elements || []).filter(el => el.tags && el.tags.name);
 
       if(!elements.length){
-        showToast('這個範圍內查不到已登記的店家，試試放大搜尋半徑');
+        showToast('這個範圍內查不到已登記的店家，試試放大搜尋半徑或移動地圖');
         icon.classList.remove('spin');
         return;
       }
@@ -538,12 +586,12 @@
           lat: el.lat, lng: el.lon,
           founded: 'unknown',
           noWebsite: !(tags.website || tags['contact:website']),
-          noFB:false, noIG:false, noLine:false, fbStale:false, lowRating:false, rating:null,
-          source:'osm', status:'new', note:'', photos:[]
+          noFB:false, noIG:false, noLine:false,
+          source:'osm', status:'new', note:'', photos:[], lastUpdated: null
         };
       });
 
-      // preserve any previously saved visit records for these exact store ids
+      // preserve any previously saved visit records
       fetched.forEach(s=>{
         try{
           const raw = localStorage.getItem('visit:'+s.id);
@@ -552,6 +600,7 @@
             s.status = saved.status || s.status;
             s.note = saved.note || '';
             s.photos = saved.photos || [];
+            s.lastUpdated = saved.lastUpdated || null;
           }
         }catch(err){}
       });
@@ -569,6 +618,56 @@
 
   // ---------- SYNC BUTTON ----------
   document.getElementById('syncBtn').addEventListener('click', fetchRealStores);
+
+  // ---------- EXPORT CSV BUTTON ----------
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    const now = new Date();
+    // 取得今天凌晨 00:00 的 Timestamp
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    
+    // 篩出有 lastUpdated 且時間在今天之內的店家
+    const todayRecords = stores.filter(s => s.lastUpdated && s.lastUpdated >= startOfToday);
+    
+    if(todayRecords.length === 0){
+      showToast('今天尚無任何拜訪或更新紀錄！');
+      return;
+    }
+
+    // 準備 CSV 內容
+    let csv = '店名,分類,地址,狀態,備註,最後更新時間
+';
+    todayRecords.forEach(s => {
+      const timeStr = new Date(s.lastUpdated).toLocaleTimeString('zh-TW', {hour12:false});
+      const escapeCSV = str => `"${String(str || '').replace(/"/g, '""')}"`; // 處理換行或逗號
+      
+      csv += [
+        escapeCSV(s.name),
+        escapeCSV(s.cat),
+        escapeCSV(s.addr),
+        escapeCSV(STATUS_LABEL[s.status]),
+        escapeCSV(s.note),
+        escapeCSV(timeStr)
+      ].join(',') + '
+';
+    });
+
+    // 加入 BOM 以解決 Excel 中文亂碼問題
+    const blob = new Blob(['﻿' + csv], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    
+    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    a.download = `地推紀錄匯報_${dateStr}.csv`;
+    
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast(`已成功匯出 ${todayRecords.length} 筆今日紀錄！`);
+  });
+
 
   // ---------- BOTTOM SHEET DRAG ----------
   const sheet = document.getElementById('sheet');
@@ -624,14 +723,13 @@
       chip.classList.toggle('on');
     });
   }
-  multiToggle('gapChips'); multiToggle('socialChips');
+  multiToggle('gapChips');
 
   document.getElementById('applyFilter').addEventListener('click', ()=>{
     filters.radius = Number(document.querySelector('#radiusChips .on').dataset.v);
     filters.founded = document.querySelector('#foundedChips .on').dataset.v;
     filters.gaps = [...document.querySelectorAll('#gapChips .chip-opt.on')].map(c=>c.dataset.v);
-    filters.social = [...document.querySelectorAll('#socialChips .chip-opt.on')].map(c=>c.dataset.v);
-    const active = filters.founded!=='all' || filters.gaps.length || filters.social.length || filters.radius!==1000;
+    const active = filters.founded!=='all' || filters.gaps.length || filters.radius!==1000;
     document.getElementById('filterDot').classList.toggle('show', active);
     filterOverlay.classList.remove('show');
     render();
@@ -646,6 +744,15 @@
     activeStoreId = id;
     const s = stores.find(x=>x.id===id);
     document.getElementById('recordTitle').textContent = s.name;
+    
+    // 動態載入商家詳細資訊
+    const tags = tagsFor(s).map(t => `<span class="tag">${t}</span>`).join('');
+    document.getElementById('recordStoreInfo').innerHTML = `
+      <div style="margin-bottom: 4px;">📍 ${s.addr || '地址未提供'}</div>
+      <div style="margin-bottom: 8px;">🏷️ ${s.cat}</div>
+      <div class="tags">${tags}</div>
+    `;
+
     draftStatus = s.status;
     draftPhotos = [...s.photos];
     document.getElementById('noteInput').value = s.note || '';
@@ -653,7 +760,7 @@
     renderPhotoRow();
     recordOverlay.classList.add('show');
 
-    // try to hydrate from persistent storage (in case of prior session)
+    // try to hydrate from persistent storage
     try{
       const raw = localStorage.getItem('visit:'+id);
       if(raw){
@@ -714,14 +821,24 @@
     s.status = draftStatus;
     s.note = document.getElementById('noteInput').value;
     s.photos = draftPhotos;
+    s.lastUpdated = new Date().getTime(); // 紀錄存檔當下的 Timestamp
 
     try{
-      localStorage.setItem('visit:'+s.id, JSON.stringify({status:s.status, note:s.note, photos:s.photos}));
-    }catch(err){ /* storage unavailable (e.g. private browsing), state still updated in memory */ }
+      localStorage.setItem('visit:'+s.id, JSON.stringify({
+        status:s.status, note:s.note, photos:s.photos, lastUpdated: s.lastUpdated
+      }));
+    }catch(err){ /* storage unavailable */ }
 
     recordOverlay.classList.remove('show');
     render();
     showToast(`已更新「${s.name}」為 ${STATUS_LABEL[s.status]}`);
+  });
+
+  // ---------- MAP DRAG EVENT ----------
+  map.on('moveend', () => {
+    if(hasRealData) {
+      render(); // 重新計算距離中心點並排序
+    }
   });
 
   // ---------- LOAD PERSISTED STATE ----------
@@ -739,9 +856,10 @@
           s.status = saved.status || s.status;
           s.note = saved.note || '';
           s.photos = saved.photos || [];
+          s.lastUpdated = saved.lastUpdated || null;
         }
       }
-    }catch(err){ /* first run, nothing saved yet, or storage blocked */ }
+    }catch(err){ /* first run */ }
     render();
   }
 
