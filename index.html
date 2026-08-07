@@ -38,7 +38,7 @@
   .header-top{display:flex;align-items:center;justify-content:space-between;gap:6px;}
   .loc-block{display:flex;flex-direction:column;line-height:1.1;flex:1;}
   .loc-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--signal-dim);text-transform:uppercase;}
-  .loc-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;letter-spacing:.01em;white-space:nowrap;}
+  .loc-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .brand{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:var(--paper-dim);letter-spacing:.08em;opacity:.6;}
   .header-actions{display:flex;gap:6px;}
   .hbtn{
@@ -74,7 +74,6 @@
   #map{width:100%;height:100%;}
   .leaflet-control-attribution{font-size:9px;}
 
-  /* Floating Action Button (新增地點) */
   #addStoreFab {
     position: absolute; right: 14px; bottom: 85px; z-index: 400;
     background: var(--signal); color: #1a0d05; border: none;
@@ -85,11 +84,22 @@
   }
   #addStoreFab:active { transform: scale(0.92); }
 
+  #cancelFocusBtn {
+    position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 450;
+    background: var(--ink); color: var(--paper); border: none; padding: 10px 22px;
+    border-radius: 999px; font-weight: 800; font-size: 14px; box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    display: none; align-items: center; gap: 8px; cursor: pointer; white-space: nowrap;
+    border: 2px solid var(--signal); font-family: 'Noto Sans TC', sans-serif;
+  }
+  #cancelFocusBtn:active { transform: translateX(-50%) scale(0.95); }
+
   .toast{
     position:absolute;left:50%;top:14px;transform:translate(-50%,-140%);
     background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:999px;
     font-size:12.5px;font-weight:500;box-shadow:0 6px 18px rgba(0,0,0,.35);
-    display:flex;align-items:center;gap:7px;z-index:450;transition:transform .28s cubic-bezier(.2,.8,.3,1.1);
+    display:flex;align-items:center;gap:7px;
+    z-index:10000; /* 修正：將 Toast 提到最上層 */
+    transition:transform .28s cubic-bezier(.2,.8,.3,1.1);
     white-space:nowrap;
   }
   .toast.show{transform:translate(-50%,0);}
@@ -102,8 +112,9 @@
   .legend span{display:flex;align-items:center;gap:4px;}
   .legend i{width:8px;height:8px;border-radius:50%;display:inline-block;}
 
-  .pin{width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4);position:relative;}
+  .pin{width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4);position:relative; transition: all 0.2s;}
   .pin.pulse::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid currentColor;animation:pulse 1.8s ease-out infinite;transform:rotate(0);}
+  .pin.focused { transform: scale(1.4) rotate(-45deg) !important; border-width: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.6); }
   @keyframes pulse{0%{transform:scale(.5) rotate(45deg);opacity:.9;}100%{transform:scale(1.9) rotate(45deg);opacity:0;}}
 
   /* BOTTOM SHEET */
@@ -117,7 +128,7 @@
   #sheet.dragging{transition:none;}
   #handle{flex:0 0 auto;padding:9px 0 6px;display:flex;flex-direction:column;align-items:center;cursor:grab;gap:6px;}
   #handle .bar{width:38px;height:4px;border-radius:2px;background:#c9c4b2;}
-  #sheet-summary{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:.03em;}
+  #sheet-summary{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:.03em; transition:opacity 0.2s;}
   #sheet-summary b{color:var(--ink);}
   #sourceTag{font-weight:700;}
   #sourceTag.src-demo{color:var(--signal);}
@@ -140,13 +151,22 @@
   .card-dist{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;color:var(--ink);white-space:nowrap;text-align:right;}
   .card-dist small{display:block;font-weight:500;font-size:9.5px;color:var(--text-dim);}
   .card-addr{font-size:11.5px;color:var(--text-dim);}
-  .tags{display:flex;flex-wrap:wrap;gap:5px;}
+  .tags{display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
+  
   .tag{
     background:#e6f4ea;color:#166534;border:1px solid #bbf7d0;font-size:10.5px;font-weight:700;
     padding:3px 7px;border-radius:6px;
   }
   .tag.warn{background:#fff4e0;color:#8a5300;border:1px solid #f2cf8f;}
   .tag.custom{background:#f3e8ff;color:#6b21a8;border:1px solid #d8b4fe;}
+  .tag.boss{background:#fef08a;color:#854d0e;border:1px solid #fde047;}
+
+  .tag.fb{background:#e8f4fd;color:#0ea5e9;border:1px solid #bae6fd;}
+  .tag.ig{background:#fae8ff;color:#d946ef;border:1px solid #f5d0fe;}
+  .tag.line{background:#dcfce7;color:#22c55e;border:1px solid #bbf7d0;}
+  .tag-link { text-decoration: none; cursor: pointer; }
+  .tag-link:hover .tag { filter: brightness(0.95); }
+
   .status-chip{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;align-self:flex-start;}
   .status-chip.status-new{background:#e7f0ff;color:var(--blue);}
   .status-chip.status-negotiating{background:#fef3d6;color:#9a6a00;}
@@ -165,24 +185,37 @@
 
   /* MODALS */
   .overlay{
-    position:absolute;inset:0;background:rgba(15,17,22,.55);z-index:80;
+    position:absolute;inset:0;background:rgba(15,17,22,.65);
+    z-index:9999; /* 修正：強制壓過 Leaflet 地圖的所有圖層 (原為80) */
     display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .2s;
+    padding-top: max(30px, env(safe-area-inset-top)); 
   }
   .overlay.show{opacity:1;pointer-events:auto;}
   .modal{
     background:var(--paper);width:100%;border-radius:20px 20px 0 0;
-    max-height:85dvh; display:flex;flex-direction:column;
+    max-height: calc(100% - 10px); 
+    display:flex;flex-direction:column;
     transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.25,1);
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
   }
   .overlay.show .modal{transform:translateY(0);}
-  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px;border-bottom:1px solid var(--line);flex:0 0 auto;}
-  .modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;color:var(--ink);}
-  .modal-close{width:30px;height:30px;border-radius:50%;background:var(--paper-dim);border:none;font-size:16px;cursor:pointer;color:var(--ink);}
+  
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;border-bottom:1px solid var(--line);flex:0 0 auto;}
+  .modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;color:var(--ink);}
+  
+  .modal-close{
+    width:38px;height:38px;border-radius:50%;background:#fde2e2;
+    border:2px solid #e3403a;font-size:20px;font-weight:900;cursor:pointer;color:#e3403a;
+    display:flex;align-items:center;justify-content:center; flex:0 0 auto;
+    box-shadow: 0 2px 6px rgba(227, 64, 58, 0.3);
+  }
+  .modal-close:active { transform: scale(0.9); }
+
   .modal-body{
-    padding:14px 18px 10px; overflow-y:auto; flex:1 1 auto; min-height:0; -webkit-overflow-scrolling:touch;
+    padding:16px 20px 10px; overflow-y:auto; flex:1 1 auto; min-height:0; -webkit-overflow-scrolling:touch;
   }
   .modal-foot{
-    padding:12px 18px max(18px, env(safe-area-inset-bottom));
+    padding:12px 20px max(18px, env(safe-area-inset-bottom));
     flex:0 0 auto;border-top:1px solid var(--line); background:var(--paper); z-index: 10;
   }
   
@@ -192,7 +225,7 @@
   }
   .primary-btn:active{transform:scale(.98);}
 
-  .f-group{margin-bottom:18px;}
+  .f-group{margin-bottom:20px;}
   .f-label{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
   .f-label .n{font-family:'JetBrains Mono',monospace;color:var(--signal);}
   .chips{display:flex;flex-wrap:wrap;gap:8px;}
@@ -203,14 +236,14 @@
   .chip-opt.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
 
   .status-select{display:flex;gap:6px;margin-bottom:16px;}
-  .status-opt{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 2px;text-align:center;font-size:11.5px;font-weight:700;color:var(--text-dim);cursor:pointer;}
+  .status-opt{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 2px;text-align:center;font-size:11.5px;font-weight:700;color:var(--text-dim);cursor:pointer; transition:all .2s;}
   .status-opt .dotc{width:9px;height:9px;border-radius:50%;margin:0 auto 5px;}
   .status-opt.on{border-color:currentColor;background:rgba(0,0,0,.03);}
+  
   .status-opt[data-s="new"]{color:var(--blue);}
   .status-opt[data-s="negotiating"]{color:var(--yellow);}
   .status-opt[data-s="won"]{color:var(--green);}
   .status-opt[data-s="lost"]{color:var(--red);}
-  .status-opt .dotc{background:currentColor;}
 
   .photo-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;}
   .photo-add{
@@ -227,7 +260,14 @@
   }
   textarea.note{min-height:96px;resize:vertical;}
   textarea.note:focus, input.txt:focus{outline:2px solid var(--signal);outline-offset:1px;}
-  .voice-hint{font-size:10.5px;color:var(--text-dim);margin-top:5px;display:flex;align-items:center;gap:5px;}
+  .voice-hint{font-size:10.5px;color:var(--text-dim);margin-top:5px;display:flex;align-items:center;gap:5px;line-height:1.4;}
+
+  .search-gov-btn {
+    background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe;
+    padding: 6px 10px; border-radius: 8px; font-size: 11.5px; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap;
+  }
+  .search-gov-btn:active { transform: scale(0.95); }
 </style>
 </head>
 <body>
@@ -237,11 +277,11 @@
     <div class="header-top">
       <div class="loc-block">
         <span class="brand">地推雷達 · LEAD RADAR</span>
-        <span class="loc-name">📍 <span id="locName">台中市西區</span></span>
+        <span class="loc-name">📍 <span id="locName">定位中...</span></span>
       </div>
       <div class="header-actions">
         <button class="hbtn export" id="exportBtn"><span>📤</span>匯出</button>
-        <button class="hbtn filter" id="filterBtn"><span>⚙️</span>篩選設定<span class="filter-dot" id="filterDot"></span></button>
+        <button class="hbtn filter" id="filterBtn"><span>⚙️</span>篩選<span class="filter-dot" id="filterDot"></span></button>
         <button class="hbtn sync" id="syncBtn"><span class="sync-icon" id="syncIcon">🔄</span>更新</button>
       </div>
     </div>
@@ -254,6 +294,10 @@
   <div id="mapwrap">
     <div id="map"></div>
     <button id="addStoreFab" title="手動建立店家">➕</button>
+    
+    <!-- 單獨顯示模式的取消按鈕 -->
+    <button id="cancelFocusBtn"><span>✕</span> 退出單獨顯示模式</button>
+
     <div class="toast" id="toast"><span class="dot"></span><span id="toastMsg"></span></div>
     <div class="legend">
       <span><i style="background:#2f7dfb"></i>未拜訪</span>
@@ -268,7 +312,7 @@
     <div id="list"></div>
   </div>
 
-  <!-- FILTER & SETTINGS MODAL -->
+  <!-- FILTER MODAL -->
   <div class="overlay" id="filterOverlay">
     <div class="modal">
       <div class="modal-head"><span class="modal-title">系統設定與篩選</span><button class="modal-close" id="filterCloseX">✕</button></div>
@@ -316,7 +360,6 @@
             <div style="font-size:12.5px; font-weight:700; color:#166534;">✅ 已綁定雲端表格</div>
             <button id="editGasBtn" style="background:transparent; border:1px solid #166534; color:#166534; border-radius:6px; padding:4px 10px; font-size:11.5px; font-weight:bold; cursor:pointer;">變更</button>
           </div>
-          <div class="voice-hint">💡 設定後，按下右上角「匯出」將直接寫入雲端，否則為下載 Excel 檔。</div>
         </div>
 
       </div>
@@ -333,6 +376,10 @@
         <div class="f-group">
           <div class="f-label">店家名稱 <span style="color:var(--red);">*</span></div>
           <input type="text" id="newStoreName" class="txt" placeholder="請輸入完整店名">
+        </div>
+        <div class="f-group">
+          <div class="f-label">負責人/老闆姓氏 (選填)</div>
+          <input type="text" id="newStoreBoss" class="txt" placeholder="例如：陳、林、王...">
         </div>
         <div class="f-group">
           <div class="f-label">行業分類</div>
@@ -353,20 +400,38 @@
       <div class="modal-head"><span class="modal-title" id="recordTitle">拜訪紀錄</span><button class="modal-close" id="recordCloseX">✕</button></div>
       <div class="modal-body">
         <div id="recordStoreInfo" style="margin-bottom: 16px; font-size: 12.5px; color: var(--text-dim); line-height: 1.5;"></div>
-        <div class="status-select" id="statusSelect">
-          <div class="status-opt" data-s="new"><div class="dotc"></div>未拜訪</div>
-          <div class="status-opt" data-s="negotiating"><div class="dotc"></div>洽談中</div>
-          <div class="status-opt" data-s="won"><div class="dotc"></div>成功簽約</div>
-          <div class="status-opt" data-s="lost"><div class="dotc"></div>已拒絕</div>
+        
+        <div class="f-group">
+          <div class="f-label" style="justify-content: space-between;">
+            負責人/老闆姓氏
+            <button type="button" id="searchGovBtn" class="search-gov-btn">🔍 查政府登記</button>
+          </div>
+          <input type="text" id="bossInput" class="txt" placeholder="點擊右上角查詢後，於此輸入姓氏 (如:陳)">
         </div>
-        <div class="f-label">現場照片</div>
-        <div class="photo-row" id="photoRow">
-          <div class="photo-add" id="photoAdd">📷<span>拍照上傳</span></div>
+
+        <div class="f-group">
+          <div class="f-label">拜訪進度</div>
+          <div class="status-select" id="statusSelect">
+            <div class="status-opt" data-s="new"><div class="dotc"></div>未拜訪</div>
+            <div class="status-opt" data-s="negotiating"><div class="dotc"></div>洽談中</div>
+            <div class="status-opt" data-s="won"><div class="dotc"></div>成功簽約</div>
+            <div class="status-opt" data-s="lost"><div class="dotc"></div>已拒絕</div>
+          </div>
         </div>
-        <input type="file" accept="image/*" capture="environment" id="photoInput" style="display:none">
-        <div class="f-label">備註</div>
-        <textarea class="note" id="noteInput" placeholder="輸入拜訪重點，例如老闆態度、決策者、下次跟進時間…"></textarea>
-        <div class="voice-hint">🎙️ 可使用手機系統鍵盤的語音輸入直接口述重點</div>
+
+        <div class="f-group">
+          <div class="f-label">現場照片</div>
+          <div class="photo-row" id="photoRow">
+            <div class="photo-add" id="photoAdd">📷<span>拍照上傳</span></div>
+          </div>
+          <input type="file" accept="image/*" capture="environment" id="photoInput" style="display:none">
+        </div>
+        
+        <div class="f-group">
+          <div class="f-label">備註</div>
+          <textarea class="note" id="noteInput" placeholder="輸入拜訪重點，例如老闆態度、決策者、下次跟進時間…"></textarea>
+          <div class="voice-hint">🎙️ 可使用手機系統鍵盤的語音輸入直接口述重點</div>
+        </div>
       </div>
       <div class="modal-foot"><button class="primary-btn" id="saveRecord">儲存紀錄</button></div>
     </div>
@@ -385,19 +450,12 @@
   const STATUS_LABEL = {new:'未拜訪', negotiating:'洽談中', won:'已成功簽約', lost:'已拒絕'};
   const CENTER = {lat:24.1508, lng:120.6650}; 
 
-  // 常見連鎖品牌過濾關鍵字
   const CHAIN_KEYWORDS = ['7-11','7-eleven','全家','萊爾富','ok超商','麥當勞','肯德基','摩斯','星巴克','路易莎','50嵐','清心','屈臣氏','康是美','寶雅','全聯','家樂福','八方雲集','大苑子','茶湯會','可不可','迷客夏','cama','拿坡里','達美樂','必勝客','王品','壽司郎'];
 
-  // 重建較豐富的示範資料 (包含公司行號)
   const RAW_STORES = [
-    {id:'s1', name:'金旺五金行', cat:'五金百貨', addr:'台中市西區大隆路12號', lat:24.1487, lng:120.6612, founded:'old', hasWebsite:false, hasFB:false, hasIG:false, hasLine:false},
-    {id:'s2', name:'順心早午餐', cat:'餐飲', addr:'台中市西區存中街45號', lat:24.1523, lng:120.6631, founded:'new', hasWebsite:false, hasFB:true, hasIG:true, hasLine:false},
-    {id:'s3', name:'安可牙醫診所', cat:'醫療診所', addr:'台中市西區美村路一段88號', lat:24.1461, lng:120.6685, founded:'old', hasWebsite:false, hasFB:false, hasIG:false, hasLine:false},
-    {id:'s4', name:'巷口洗衣坊', cat:'生活服務', addr:'台中市西區永順街20號', lat:24.1549, lng:120.6668, founded:'old', hasWebsite:false, hasFB:true, hasIG:false, hasLine:false},
-    {id:'s5', name:'創紀數位整合行銷', cat:'公司企業', addr:'台中市西區台灣大道二段285號', lat:24.1530, lng:120.6620, founded:'old', hasWebsite:true, hasFB:true, hasIG:false, hasLine:true},
-    {id:'s6', name:'綠光有機超市', cat:'零售', addr:'台中市南屯區大墩南路102號', lat:24.1408, lng:120.6355, founded:'new', hasWebsite:true, hasFB:true, hasIG:true, hasLine:true},
-    {id:'s7', name:'鐵人健身工作室', cat:'運動健身', addr:'台中市西屯區台灣大道三段268號', lat:24.1685, lng:120.6455, founded:'old', hasWebsite:true, hasFB:true, hasIG:true, hasLine:true},
-    {id:'s8', name:'晨光美髮沙龍', cat:'美業', addr:'台中市西屯區西平南巷18號', lat:24.1721, lng:120.6398, founded:'new', hasWebsite:false, hasFB:true, hasIG:true, hasLine:false}
+    {id:'s1', name:'金旺五金行', cat:'五金百貨', addr:'台中市西區大隆路12號', lat:24.1487, lng:120.6612, founded:'old', hasWebsite:false, websiteUrl: null, hasFB:false, fbUrl:null, hasIG:false, igUrl:null, hasLine:false, lineUrl:null, bossName: '陳'},
+    {id:'s2', name:'順心早午餐', cat:'餐飲', addr:'台中市西區存中街45號', lat:24.1523, lng:120.6631, founded:'new', hasWebsite:false, websiteUrl: null, hasFB:true, fbUrl:'https://facebook.com', hasIG:true, igUrl:'https://instagram.com', hasLine:false, lineUrl:null, bossName: null},
+    {id:'s5', name:'創紀數位整合行銷', cat:'公司企業', addr:'台中市西區台灣大道二段285號', lat:24.1530, lng:120.6620, founded:'old', hasWebsite:true, websiteUrl: 'https://example.com', hasFB:true, fbUrl:'https://facebook.com', hasIG:false, igUrl:null, hasLine:true, lineUrl:'https://line.me', bossName: '林'},
   ];
 
   let stores = RAW_STORES.map(s => Object.assign({status:'new', note:'', photos:[], source:'demo', lastUpdated: null}, s));
@@ -405,6 +463,7 @@
   let filters = {radius:1000, features:[], excludeChains: false};
   let userLoc = {lat:CENTER.lat, lng:CENTER.lng};
   let activeStoreId = null;
+  let focusedStoreId = null; 
   let hasRealData = false;
   let searchQuery = '';
 
@@ -417,11 +476,26 @@
 
   function tagsFor(s){
     const t=[];
+    if(s.bossName) t.push(`<span class="tag boss">👤 ${s.bossName} 老闆/負責人</span>`);
     if(s.source === 'custom') t.push('<span class="tag custom">✏️ 自訂新增</span>');
-    if(s.hasWebsite) t.push('<span class="tag">🌐 官方網站</span>');
-    if(s.hasFB) t.push('<span class="tag">📘 FB 專頁</span>');
-    if(s.hasIG) t.push('<span class="tag">📷 IG 帳號</span>');
-    if(s.hasLine) t.push('<span class="tag">💬 LINE 官方</span>');
+    
+    if(s.hasWebsite) {
+        if(s.websiteUrl) t.push(`<a href="${s.websiteUrl}" target="_blank" class="tag-link" onclick="event.stopPropagation();"><span class="tag">🌐 官方網站 ↗</span></a>`);
+        else t.push('<span class="tag">🌐 官方網站</span>');
+    }
+    if(s.hasFB) {
+        if(s.fbUrl) t.push(`<a href="${s.fbUrl}" target="_blank" class="tag-link" onclick="event.stopPropagation();"><span class="tag fb">📘 FB 專頁 ↗</span></a>`);
+        else t.push('<span class="tag fb">📘 FB 專頁</span>');
+    }
+    if(s.hasIG) {
+        if(s.igUrl) t.push(`<a href="${s.igUrl}" target="_blank" class="tag-link" onclick="event.stopPropagation();"><span class="tag ig">📷 IG 帳號 ↗</span></a>`);
+        else t.push('<span class="tag ig">📷 IG 帳號</span>');
+    }
+    if(s.hasLine) {
+        if(s.lineUrl) t.push(`<a href="${s.lineUrl}" target="_blank" class="tag-link" onclick="event.stopPropagation();"><span class="tag line">💬 LINE 官方 ↗</span></a>`);
+        else t.push('<span class="tag line">💬 LINE 官方</span>');
+    }
+
     if(t.length === 0 || (t.length===1 && s.source==='custom')) t.push('<span class="tag warn">⚠️ 無數位足跡</span>');
     return t;
   }
@@ -433,11 +507,14 @@
   const userMarker = L.circleMarker([userLoc.lat, userLoc.lng], {radius:7, color:'#fff', weight:2, fillColor:'#ff5e2c', fillOpacity:1}).addTo(map).bindTooltip('目前位置');
 
   let markers = {};
-  function makeIcon(status){
+  
+  function makeIcon(status, isFocused = false){
     const c = STATUS_COLOR[status];
     const pulse = status==='new' ? 'pulse' : '';
-    return L.divIcon({ className:'', html:`<div class="pin ${pulse}" style="background:${c};color:${c}"></div>`, iconSize:[22,22], iconAnchor:[11,20] });
+    const focusClass = isFocused ? 'focused' : '';
+    return L.divIcon({ className:'', html:`<div class="pin ${pulse} ${focusClass}" style="background:${c};color:${c}"></div>`, iconSize:[22,22], iconAnchor:[11,20] });
   }
+
   function rebuildMarkers(){
     Object.values(markers).forEach(m => map.removeLayer(m));
     markers = {};
@@ -449,20 +526,46 @@
   }
   rebuildMarkers();
 
+  async function reverseGeocode(lat, lng) {
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&addressdetails=1`);
+      const data = await response.json();
+      if (data && data.address) {
+        let locationName = '';
+        if(data.address.city) locationName += data.address.city;
+        if(data.address.town) locationName += data.address.town;
+        if(data.address.village) locationName += data.address.village;
+        if(data.address.suburb) locationName += data.address.suburb;
+        if(data.address.road) locationName += data.address.road;
+        
+        if (locationName) { document.getElementById('locName').textContent = locationName; return; }
+      }
+      document.getElementById('locName').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    } catch (error) {
+      document.getElementById('locName').textContent = "未知地點";
+    }
+  }
+
+  map.on('moveend', () => { 
+    const center = map.getCenter();
+    reverseGeocode(center.lat, center.lng);
+    if(hasRealData) render(); 
+  });
+
+
   if(navigator.geolocation){
     navigator.geolocation.watchPosition(pos=>{
       userLoc = {lat:pos.coords.latitude, lng:pos.coords.longitude};
       userMarker.setLatLng([userLoc.lat, userLoc.lng]);
     }, ()=>{}, {enableHighAccuracy: true, maximumAge: 10000});
     
-    // Initial center
     navigator.geolocation.getCurrentPosition(pos=>{
         map.setView([pos.coords.latitude, pos.coords.longitude], 15);
+        reverseGeocode(pos.coords.latitude, pos.coords.longitude);
         render();
     });
   }
 
-  // SEARCH BAR
   document.getElementById('searchInput').addEventListener('input', e => {
     searchQuery = e.target.value.trim().toLowerCase();
     document.getElementById('clearSearch').style.display = searchQuery ? 'block' : 'none';
@@ -475,73 +578,103 @@
     render();
   });
 
-  // LIST / FILTER RENDER
   function passesFilter(s, center){
-    // 永久強制過濾便利商店
     if(s.cat === '便利商店') return false;
-
     if(searchQuery) {
       const nameMatch = s.name.toLowerCase().includes(searchQuery);
       const addrMatch = (s.addr || '').toLowerCase().includes(searchQuery);
       if(!nameMatch && !addrMatch) return false;
     }
-    
     const d = haversine(center, s);
     if(!searchQuery && d > filters.radius) return false;
-    
-    // 排除特定連鎖店家邏輯
     if(filters.excludeChains) {
        const lowerName = s.name.toLowerCase();
        if(CHAIN_KEYWORDS.some(k => lowerName.includes(k))) return false;
     }
-
     if(filters.features.length > 0 && !filters.features.every(f => s[f])) return false;
     return true;
+  }
+
+  function createCardHtml(s, dist) {
+    const tagsHtml = tagsFor(s).join('');
+    return `
+    <div class="card status-${s.status}" data-id="${s.id}">
+      <div class="status-chip status-${s.status}">${STATUS_LABEL[s.status]}</div>
+      <div class="card-top">
+        <div><div class="card-name">${s.name}</div><div class="card-meta">${s.cat}</div></div>
+        <div class="card-dist">${dist}m<small>距離中心</small></div>
+      </div>
+      <div class="card-addr">${s.addr || '地址未提供'}</div>
+      <div class="tags">${tagsHtml}</div>
+      <div class="card-actions">
+        <button class="abtn nav" data-act="nav" data-id="${s.id}">🚗 導航</button>
+        <button class="abtn call" data-act="call" data-id="${s.id}">📞 電話</button>
+        <button class="abtn record" data-act="record" data-id="${s.id}">📝 紀錄/打卡</button>
+      </div>
+    </div>`;
   }
 
   function render(){
     const center = map.getCenter();
     const visible = stores.filter(s => passesFilter(s, center)).map(s=>({...s, dist:haversine(center,s)})).sort((a,b)=>a.dist-b.dist);
-    document.getElementById('countNum').textContent = visible.length;
-    document.getElementById('sourceTag').textContent = hasRealData ? '· OpenStreetMap 真實資料' : '· 示範資料（尚未更新）';
-    document.getElementById('sourceTag').className = hasRealData ? 'src-real' : 'src-demo';
+    const cancelFocusBtn = document.getElementById('cancelFocusBtn');
+    const summaryUI = document.getElementById('sheet-summary');
+    const list = document.getElementById('list');
 
     Object.entries(markers).forEach(([id,m])=>{
       const s = stores.find(x=>x.id===id);
       const show = passesFilter(s, center);
-      m.setOpacity(show ? 1 : 0.18);
-      if(show) m.setZIndexOffset(1000); else m.setZIndexOffset(0);
-      m.setIcon(makeIcon(s.status));
+      
+      if (focusedStoreId) {
+          if (id === focusedStoreId) {
+              if (!map.hasLayer(m)) m.addTo(map);
+              m.setOpacity(1);
+              m.setZIndexOffset(1000);
+              m.setIcon(makeIcon(s.status, true));
+          } else {
+              if (map.hasLayer(m)) map.removeLayer(m); 
+          }
+      } else {
+          if (show) {
+              if (!map.hasLayer(m)) m.addTo(map);
+              m.setOpacity(1);
+              m.setZIndexOffset(1000);
+          } else {
+              if (!map.hasLayer(m)) m.addTo(map);
+              m.setOpacity(0.18);
+              m.setZIndexOffset(0);
+          }
+          m.setIcon(makeIcon(s.status, false));
+      }
     });
 
-    const list = document.getElementById('list');
-    if(!visible.length){
-      list.innerHTML = `<div class="empty-state">此範圍內沒有符合條件的店家<br>試試放寬篩選半徑、搜尋字詞，或按右上角「更新」重新抓取<br><br>如果您在現場，也可點擊地圖右下角的 ➕ 自行新增店家</div>`;
-      return;
+    if (focusedStoreId) {
+        cancelFocusBtn.style.display = 'flex';
+        summaryUI.style.opacity = '0.3'; 
+        const s = stores.find(x=>x.id === focusedStoreId);
+        const d = haversine(center, s);
+        list.innerHTML = createCardHtml(s, d);
+    } else {
+        cancelFocusBtn.style.display = 'none';
+        summaryUI.style.opacity = '1';
+        document.getElementById('countNum').textContent = visible.length;
+        document.getElementById('sourceTag').textContent = hasRealData ? '· OSM 真實資料' : '· 示範資料（尚未更新）';
+        document.getElementById('sourceTag').className = hasRealData ? 'src-real' : 'src-demo';
+
+        if(!visible.length){
+          list.innerHTML = `<div class="empty-state">此範圍內沒有符合條件的店家</div>`;
+        } else {
+          list.innerHTML = visible.map(s => createCardHtml(s, s.dist)).join('');
+        }
     }
-    list.innerHTML = visible.map(s=>{
-      const tagsHtml = tagsFor(s).join('');
-      return `
-      <div class="card status-${s.status}" data-id="${s.id}">
-        <div class="status-chip status-${s.status}">${STATUS_LABEL[s.status]}</div>
-        <div class="card-top">
-          <div><div class="card-name">${s.name}</div><div class="card-meta">${s.cat}</div></div>
-          <div class="card-dist">${s.dist}m<small>距離中心</small></div>
-        </div>
-        <div class="card-addr">${s.addr || '地址未提供'}</div>
-        <div class="tags">${tagsHtml}</div>
-        <div class="card-actions">
-          <button class="abtn nav" data-act="nav" data-id="${s.id}">🚗 導航</button>
-          <button class="abtn call" data-act="call" data-id="${s.id}">📞 電話</button>
-          <button class="abtn record" data-act="record" data-id="${s.id}">📝 紀錄/打卡</button>
-        </div>
-      </div>`;
-    }).join('');
   }
 
   document.getElementById('list').addEventListener('click', e=>{
+    if(e.target.closest('a')) return; 
+
     const btn = e.target.closest('.abtn');
     const card = e.target.closest('.card');
+    
     if(btn){
       const id = btn.dataset.id;
       const s = stores.find(x=>x.id===id);
@@ -550,15 +683,25 @@
       } else if(btn.dataset.act === 'record'){ openRecord(id); }
       return;
     }
+    
     if(card) {
       const id = card.dataset.id;
       const s = stores.find(x=>x.id===id);
-      map.setView([s.lat, s.lng], 16, {animate: true});
-      setSheetVh(40); 
+      
+      focusedStoreId = id;
+      map.setView([s.lat, s.lng], 17, {animate: true}); 
+      setSheetVh(14); 
+      render(); 
     }
   });
 
-  // TOAST
+  document.getElementById('cancelFocusBtn').addEventListener('click', () => {
+      focusedStoreId = null;
+      setSheetVh(40); 
+      render();
+  });
+
+
   let toastTimer;
   function showToast(msg){
     const t = document.getElementById('toast');
@@ -568,9 +711,9 @@
     toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
   }
 
-  // ADD CUSTOM STORE (改成使用 GPS 定位點)
   document.getElementById('addStoreFab').addEventListener('click', () => {
     document.getElementById('newStoreName').value = '';
+    document.getElementById('newStoreBoss').value = '';
     document.getElementById('newStoreCat').value = '';
     document.getElementById('newStoreAddr').value = '';
     document.getElementById('addStoreOverlay').classList.add('show');
@@ -580,61 +723,63 @@
   document.getElementById('saveNewStore').addEventListener('click', () => {
     const name = document.getElementById('newStoreName').value.trim();
     if (!name) return showToast('❌ 請輸入店家名稱');
+    const boss = document.getElementById('newStoreBoss').value.trim();
     
-    const cat = document.getElementById('newStoreCat').value.trim() || '其他';
-    const addr = document.getElementById('newStoreAddr').value.trim();
-    
-    // 使用 userLoc (GPS 當下定位) 而非 map.getCenter()
     const newId = 'custom-' + Date.now();
     const newStore = {
-      id: newId, name: name, cat: cat, addr: addr,
+      id: newId, name: name, cat: document.getElementById('newStoreCat').value.trim() || '其他', addr: document.getElementById('newStoreAddr').value.trim(),
       lat: userLoc.lat, lng: userLoc.lng,
-      founded: 'unknown', hasWebsite: false, hasFB: false, hasIG: false, hasLine: false,
+      founded: 'unknown', hasWebsite: false, websiteUrl: null, hasFB: false, fbUrl: null, hasIG: false, igUrl: null, hasLine: false, lineUrl: null, bossName: boss || null,
       source: 'custom', status: 'new', note: '', photos: [], lastUpdated: null
     };
 
-    customStores.push(newStore);
-    stores.push(newStore);
+    customStores.push(newStore); stores.push(newStore);
     try { localStorage.setItem('customStores', JSON.stringify(customStores)); } catch(e){}
 
-    // 把地圖視角移到新建的點上
     map.setView([userLoc.lat, userLoc.lng], 16, {animate: true});
-    rebuildMarkers();
-    render();
-    
+    rebuildMarkers(); render();
     document.getElementById('addStoreOverlay').classList.remove('show');
     showToast('✅ 成功新增地標！');
     setTimeout(() => openRecord(newId), 300);
   });
 
-  // REAL DATA OVERPASS
-  const OSM_CATEGORY_MAP = {
-    'shop:convenience':'便利商店', 'shop:supermarket':'超市', 'shop:bakery':'烘焙', 'shop:clothes':'服飾', 'shop:hairdresser':'美髮',
-    'shop:electronics':'電子3C', 'shop:optician':'眼鏡', 'shop:pet':'寵物用品', 'shop:florist':'花店', 'shop:car_repair':'汽修',
-    'shop:hardware':'五金', 'amenity:restaurant':'餐廳', 'amenity:cafe':'咖啡廳', 'amenity:fast_food':'速食',
-    'amenity:pharmacy':'藥局', 'amenity:clinic':'診所', 'amenity:dentist':'牙醫診所', 'office:company':'公司企業', 'office:estate_agent':'房屋仲介'
-  };
+  function buildSocialUrl(raw, type) {
+      if(!raw) return null;
+      if(raw.startsWith('http')) return raw;
+      if(type === 'fb') return 'https://facebook.com/' + raw;
+      if(type === 'ig') return 'https://instagram.com/' + raw;
+      if(type === 'line') return 'https://line.me/R/ti/p/' + raw;
+      return raw;
+  }
+
+  function getWebsite(tags) {
+      let url = tags.website || tags['contact:website'];
+      if(url && !url.startsWith('http')) url = 'http://' + url;
+      return url || null;
+  }
+
   function osmCategory(tags){
-    // 新增 office 類型的判定
-    if(tags.office) return OSM_CATEGORY_MAP['office:'+tags.office] || '公司企業';
+    if(tags.office) return '公司企業';
+    if(tags.craft) return '工班/修繕';
     for(const key of ['shop','amenity']){
-      if(tags[key]){ const label = OSM_CATEGORY_MAP[key+':'+tags[key]]; return label || '其他'; }
+      if(tags[key]) return '商店/服務';
     }
     return '其他';
   }
+
   function osmAddress(tags){
     if(tags['addr:full']) return tags['addr:full'];
     return [tags['addr:city'], tags['addr:district'], tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join('');
   }
+
   function buildOverpassQuery(lat, lng, radiusM){
-    // 加入 node["office"] 讓它能抓到公司企業
-    return `[out:json][timeout:25];(node["shop"]["name"](around:${radiusM},${lat},${lng});node["amenity"~"restaurant|cafe|fast_food|bar|pub|pharmacy|bank|clinic|dentist|veterinary|driving_school|fitness_centre|kindergarten"]["name"](around:${radiusM},${lat},${lng});node["office"]["name"](around:${radiusM},${lat},${lng}););out body;`;
+    return `[out:json][timeout:25];(node["shop"](around:${radiusM},${lat},${lng});node["amenity"~"restaurant|cafe|fast_food|bar|pub|pharmacy|bank|clinic|dentist|veterinary|driving_school|fitness_centre|kindergarten"](around:${radiusM},${lat},${lng});node["office"](around:${radiusM},${lat},${lng});node["craft"](around:${radiusM},${lat},${lng}););out body;`;
   }
 
   async function fetchRealStores(){
     const icon = document.getElementById('syncIcon');
     icon.classList.add('spin');
-    showToast('正在向 OpenStreetMap 查詢畫面中心附近店家…');
+    showToast('正在向 OpenStreetMap 查詢...');
     const currentCenter = map.getCenter();
     try{
       const res = await fetch('https://overpass-api.de/api/interpreter', { method:'POST', body:'data='+encodeURIComponent(buildOverpassQuery(currentCenter.lat, currentCenter.lng, filters.radius)) });
@@ -644,38 +789,46 @@
       
       const fetched = elements.map(el=>{
         const tags = el.tags;
+        const webUrl = getWebsite(tags);
+        const fbRaw = tags['contact:facebook'] || tags.facebook;
+        const igRaw = tags['contact:instagram'] || tags.instagram;
+        const lineRaw = tags['contact:line'] || tags.line;
+
         return {
           id: 'osm-'+el.id, name: tags.name, cat: osmCategory(tags), addr: osmAddress(tags),
           lat: el.lat, lng: el.lon, founded: 'unknown',
-          hasWebsite: !!(tags.website || tags['contact:website']),
-          hasFB: !!(tags['contact:facebook'] || tags.facebook),
-          hasIG: !!(tags['contact:instagram'] || tags.instagram),
-          hasLine: !!(tags['contact:line'] || tags.line),
+          hasWebsite: !!webUrl, websiteUrl: webUrl,
+          hasFB: !!fbRaw, fbUrl: buildSocialUrl(fbRaw, 'fb'),
+          hasIG: !!igRaw, igUrl: buildSocialUrl(igRaw, 'ig'),
+          hasLine: !!lineRaw, lineUrl: buildSocialUrl(lineRaw, 'line'),
+          bossName: null,
           source:'osm', status:'new', note:'', photos:[], lastUpdated: null
         };
-      }).filter(s => s.cat !== '便利商店'); // 抓取時直接剔除便利商店
+      }).filter(s => s.cat !== '便利商店'); 
 
       if(!fetched.length && !customStores.length){
-        showToast('這個範圍內查不到已登記的店家，試試放大搜尋半徑或移動地圖');
-        icon.classList.remove('spin'); return;
+        showToast('此範圍查無店家'); icon.classList.remove('spin'); return;
       }
 
       fetched.push(...customStores);
       fetched.forEach(s=>{
         try{
           const raw = localStorage.getItem('visit:'+s.id);
-          if(raw){ const saved = JSON.parse(raw); s.status = saved.status; s.note = saved.note; s.photos = saved.photos; s.lastUpdated = saved.lastUpdated; }
+          if(raw){ 
+             const saved = JSON.parse(raw); 
+             s.status = saved.status; s.note = saved.note; s.photos = saved.photos; s.lastUpdated = saved.lastUpdated; 
+             if(saved.bossName) s.bossName = saved.bossName;
+          }
         }catch(err){}
       });
 
       stores = fetched; hasRealData = true; rebuildMarkers(); render();
-      showToast(`已抓到 ${fetched.length - customStores.length} 間附近店家與公司`);
-    }catch(err){ showToast('查詢失敗，請檢查網路連線後再試一次'); }
+      showToast(`抓取完成`);
+    }catch(err){ showToast('查詢失敗，請檢查網路'); }
     icon.classList.remove('spin');
   }
   document.getElementById('syncBtn').addEventListener('click', fetchRealStores);
 
-  // EXPORT (EXCEL / GAS)
   document.getElementById('exportBtn').addEventListener('click', () => {
     const startOfToday = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime();
     const todayRecords = stores.filter(s => s.lastUpdated && s.lastUpdated >= startOfToday);
@@ -685,16 +838,16 @@
     const gasUrl = localStorage.getItem('gasUrl');
     const salesName = localStorage.getItem('salesName') || '未設定姓名';
     
-    const rowData = todayRecords.map(s => [
-      salesName, s.name || '', s.cat || '', s.addr || '',
-      STATUS_LABEL[s.status] || '', s.note || '',
-      new Date(s.lastUpdated).toLocaleTimeString('zh-TW', {hour12:false})
-    ]);
+    const rowData = todayRecords.map(s => {
+      return [
+        salesName, s.name || '', s.bossName || '', s.cat || '', s.addr || '',
+        STATUS_LABEL[s.status] || '', s.note || '',
+        new Date(s.lastUpdated).toLocaleTimeString('zh-TW', {hour12:false})
+      ];
+    });
 
     if (gasUrl && gasUrl.startsWith('https://script.google.com')) {
       showToast('☁️ 正在同步至 Google 雲端試算表...');
-      
-      // 使用 no-cors 強制推送，繞過瀏覽器跨域擋截
       fetch(gasUrl, {
         method: 'POST', mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -706,7 +859,7 @@
       });
     } else {
       if(typeof XLSX === 'undefined') return showToast('匯出套件載入中，請稍後...');
-      const excelData = [['業務員', '店名', '分類', '地址', '狀態', '備註', '最後更新時間'], ...rowData];
+      const excelData = [['業務員', '店名', '聯絡人/老闆', '分類', '地址', '狀態', '備註', '最後更新時間'], ...rowData];
       const ws = XLSX.utils.aoa_to_sheet(excelData);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "今日紀錄");
@@ -715,7 +868,6 @@
     }
   });
 
-  // DRAG SHEET
   const sheet = document.getElementById('sheet'), handle = document.getElementById('handle'), SNAPS = {peek:14, half:40, full:78}; 
   let dragStartY=0, dragStartH=0, dragging=false;
   function setSheetVh(vh){ sheet.style.height = vh+'dvh'; }
@@ -730,12 +882,10 @@
   handle.addEventListener('mousedown', e=>onDown(e.clientY)); window.addEventListener('mousemove', e=>onMove(e.clientY)); window.addEventListener('mouseup', onUp);
   handle.addEventListener('touchstart', e=>onDown(e.touches[0].clientY), {passive:true}); window.addEventListener('touchmove', e=>{ if(dragging) onMove(e.touches[0].clientY); }, {passive:true}); window.addEventListener('touchend', onUp);
 
-  // FILTER MODAL
   const filterOverlay = document.getElementById('filterOverlay');
   document.getElementById('filterBtn').addEventListener('click', ()=> filterOverlay.classList.add('show'));
   document.getElementById('filterCloseX').addEventListener('click', ()=> filterOverlay.classList.remove('show'));
-  filterOverlay.addEventListener('click', e=>{ if(e.target===filterOverlay) filterOverlay.classList.remove('show'); });
-
+  
   document.querySelectorAll('.chips').forEach(container => {
     if(container.id === 'featureChips' || container.id === 'excludeChips'){
       container.addEventListener('click', e=>{ const chip = e.target.closest('.chip-opt'); if(chip) chip.classList.toggle('on'); });
@@ -747,7 +897,6 @@
     }
   });
 
-  // GAS URL & SALES NAME UI
   function updateGasUI() {
     const url = localStorage.getItem('gasUrl');
     if (url && url.trim() !== '') {
@@ -781,7 +930,6 @@
     showToast('已套用設定');
   });
 
-  // RECORD MODAL
   const recordOverlay = document.getElementById('recordOverlay');
   let draftStatus='new', draftPhotos=[];
 
@@ -790,13 +938,28 @@
     const s = stores.find(x=>x.id===id);
     document.getElementById('recordTitle').textContent = s.name;
     document.getElementById('recordStoreInfo').innerHTML = `<div style="margin-bottom: 4px;">📍 ${s.addr || '地址未提供'}</div><div style="margin-bottom: 8px;">🏷️ ${s.cat}</div><div class="tags">${tagsFor(s).join('')}</div>`;
-    draftStatus = s.status; draftPhotos = [...s.photos];
+    
+    draftStatus = s.status; 
+    draftPhotos = [...s.photos];
+    
+    document.getElementById('bossInput').value = s.bossName || '';
     document.getElementById('noteInput').value = s.note || '';
-    renderStatusSelect(); renderPhotoRow();
+    
+    renderStatusSelect(); 
+    renderPhotoRow();
     recordOverlay.classList.add('show');
   }
 
-  function renderStatusSelect(){ document.querySelectorAll('.status-opt').forEach(el=>el.classList.toggle('on', el.dataset.s === draftStatus)); }
+  document.getElementById('searchGovBtn').addEventListener('click', () => {
+    const s = stores.find(x => x.id === activeStoreId);
+    if(s && s.name) {
+      const searchUrl = 'https://findbiz.nat.gov.tw/fts/query/QueryList/queryList.do?infoDesc=' + encodeURIComponent(s.name);
+      window.open(searchUrl, '_blank');
+      showToast('已開啟政府工商登記查詢！');
+    }
+  });
+
+  function renderStatusSelect(){ document.querySelectorAll('#statusSelect .status-opt').forEach(el=>el.classList.toggle('on', el.dataset.s === draftStatus)); }
   document.getElementById('statusSelect').addEventListener('click', e=>{ const opt = e.target.closest('.status-opt'); if(opt){ draftStatus = opt.dataset.s; renderStatusSelect(); } });
 
   function renderPhotoRow(){
@@ -816,16 +979,21 @@
   });
 
   document.getElementById('recordCloseX').addEventListener('click', ()=> recordOverlay.classList.remove('show'));
-  recordOverlay.addEventListener('click', e=>{ if(e.target===recordOverlay) recordOverlay.classList.remove('show'); });
 
   document.getElementById('saveRecord').addEventListener('click', async ()=>{
     const s = stores.find(x=>x.id===activeStoreId);
-    s.status = draftStatus; s.note = document.getElementById('noteInput').value; s.photos = draftPhotos; s.lastUpdated = new Date().getTime(); 
-    try{ localStorage.setItem('visit:'+s.id, JSON.stringify({ status:s.status, note:s.note, photos:s.photos, lastUpdated: s.lastUpdated })); }catch(err){}
-    recordOverlay.classList.remove('show'); render(); showToast(`已更新「${s.name}」為 ${STATUS_LABEL[s.status]}`);
-  });
+    s.status = draftStatus; 
+    s.bossName = document.getElementById('bossInput').value.trim() || null;
+    s.note = document.getElementById('noteInput').value; 
+    s.photos = draftPhotos; 
+    s.lastUpdated = new Date().getTime(); 
 
-  map.on('moveend', () => { if(hasRealData) render(); });
+    try{ localStorage.setItem('visit:'+s.id, JSON.stringify({ status:s.status, bossName:s.bossName, note:s.note, photos:s.photos, lastUpdated: s.lastUpdated })); }catch(err){}
+
+    recordOverlay.classList.remove('show'); 
+    render(); 
+    showToast(`已更新「${s.name}」紀錄`);
+  });
 
   async function hydrateAll(){
     try{
@@ -835,7 +1003,11 @@
         const key = localStorage.key(i); if(!key || !key.startsWith('visit:')) continue;
         const id = key.replace('visit:',''); const s = stores.find(x=>x.id===id); if(!s) continue;
         const raw = localStorage.getItem(key);
-        if(raw){ const saved = JSON.parse(raw); s.status = saved.status; s.note = saved.note; s.photos = saved.photos; s.lastUpdated = saved.lastUpdated; }
+        if(raw){ 
+          const saved = JSON.parse(raw); 
+          s.status = saved.status; s.note = saved.note; s.photos = saved.photos; s.lastUpdated = saved.lastUpdated; 
+          if(saved.bossName) s.bossName = saved.bossName;
+        }
       }
       updateGasUI();
     }catch(err){}
