@@ -97,9 +97,7 @@
     position:absolute;left:50%;top:14px;transform:translate(-50%,-140%);
     background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:999px;
     font-size:12.5px;font-weight:500;box-shadow:0 6px 18px rgba(0,0,0,.35);
-    display:flex;align-items:center;gap:7px;
-    z-index:10000; /* 修正：將 Toast 提到最上層 */
-    transition:transform .28s cubic-bezier(.2,.8,.3,1.1);
+    display:flex;align-items:center;gap:7px;z-index:10000;transition:transform .28s cubic-bezier(.2,.8,.3,1.1);
     white-space:nowrap;
   }
   .toast.show{transform:translate(-50%,0);}
@@ -161,9 +159,12 @@
   .tag.custom{background:#f3e8ff;color:#6b21a8;border:1px solid #d8b4fe;}
   .tag.boss{background:#fef08a;color:#854d0e;border:1px solid #fde047;}
 
+  /* FB/IG/LINE 連結標籤樣式 */
   .tag.fb{background:#e8f4fd;color:#0ea5e9;border:1px solid #bae6fd;}
   .tag.ig{background:#fae8ff;color:#d946ef;border:1px solid #f5d0fe;}
   .tag.line{background:#dcfce7;color:#22c55e;border:1px solid #bbf7d0;}
+
+  /* 連結樣式，移除底線 */
   .tag-link { text-decoration: none; cursor: pointer; }
   .tag-link:hover .tag { filter: brightness(0.95); }
 
@@ -185,8 +186,7 @@
 
   /* MODALS */
   .overlay{
-    position:absolute;inset:0;background:rgba(15,17,22,.65);
-    z-index:9999; /* 修正：強制壓過 Leaflet 地圖的所有圖層 (原為80) */
+    position:absolute;inset:0;background:rgba(15,17,22,.65);z-index:9999;
     display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .2s;
     padding-top: max(30px, env(safe-area-inset-top)); 
   }
@@ -839,10 +839,20 @@
     const salesName = localStorage.getItem('salesName') || '未設定姓名';
     
     const rowData = todayRecords.map(s => {
+      // 這裡修改了時間格式，去除了秒數，呈現 YYYY/MM/DD HH:MM
+      const formatTime = new Date(s.lastUpdated).toLocaleString('zh-TW', { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: false 
+      });
+
       return [
         salesName, s.name || '', s.bossName || '', s.cat || '', s.addr || '',
         STATUS_LABEL[s.status] || '', s.note || '',
-        new Date(s.lastUpdated).toLocaleTimeString('zh-TW', {hour12:false})
+        formatTime
       ];
     });
 
